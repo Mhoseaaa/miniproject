@@ -6,7 +6,7 @@ body {
 }
 body, main {
     overflow: visible;
-}
+}   
 .navbar {
     background-color: #fff;
     padding: 15px 30px;
@@ -26,6 +26,15 @@ body, main {
     padding: 10px 15px;
     font-size: 16px;
     font-weight: bold;
+}
+
+div + a {
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.navbar a:hover {
+    color: #4d7de7;
 }
 
 .navbar div {
