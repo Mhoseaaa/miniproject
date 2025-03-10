@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pengajuan Lamaran - Job Portal</title>
-    <link rel="stylesheet" href="styles/lamaran.css">
+    <link rel="stylesheet" href="/styles/lamaran.css">
 </head>
 <body>
     <nav class="navbar">
         <a href="index.html"><img src="/assets/logo website/logo 3.png" alt="Logo Web"></a>
-        <div>
-            <a href="/index.html">Beranda</a>
-            <a href="#">Login</a>
-        </div>
+        <ul class="breadcrumb mt">
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="#">Detail</a></li>
+            <li><a href="#">Lamaran</a></li>
+        </ul>
     </nav>
 
     <main class="container">
@@ -46,7 +47,7 @@
                 <label for="surat-lamaran">Upload Surat Lamaran (opsional)</label>
                 <input type="file" id="surat-lamaran" accept=".pdf">
             </div>
-            <button type="submit">Submit Lamaran</button>
+            <button type="submit">Submit</button>
         </form>
     </main>
 
