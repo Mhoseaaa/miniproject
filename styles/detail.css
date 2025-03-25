@@ -5,107 +5,188 @@ body {
     background-color: #f8f9fa;
 }
 body, main {
-    overflow: visible;
+    overflow-x: hidden;
 }
 .navbar {
-    background-color: #fff;
-    padding: 15px 30px;
     display: flex;
-    justify-content:space-between;
     align-items: center;
-    position: fixed;
+    justify-content: space-between; 
+    padding: 5px 15px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px; 
+}
+
+.nav-item {
+    position: relative;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+    padding-bottom: 5px;
+}
+
+.nav-item::after {
+    content: "";
+    display: block;
     width: 100%;
-    top: 0;
+    height: 2px;
+    background-color: #001f54;
+    position: absolute;
     left: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    height: 50px;
+    bottom: 0;
+    transform: scaleX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.nav-item.active::after {
+    transform: scaleX(1);
+}
+
+.nav-item:hover::after {
+    transform: scaleX(1);
+}
+
+
+.logo img {
+    width: 150px !important;
+    height: auto;
+}
+
+.outline-button {
+    background: white;
+    color: #001f54; 
+    border: 2px solid #001f54; 
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.outline-button:hover {
+    background: #001f54;
+    color: white;
 }
 
 .breadcrumb {
     display: flex;
+    align-items: center;
     list-style: none;
-    padding: 10px 0;
+    padding: 0;
+    margin: 0;
     font-size: 16px;
 }
 
 .breadcrumb li {
-    display: inline;
-    color: #333;
+    display: flex;
+    align-items: center;
+    color: #555;
 }
 
 .breadcrumb li a {
     text-decoration: none;
-    color: black;
+    color: #001f54;
     font-weight: bold;
+    transition: color 0.3s;
 }
 
 .breadcrumb li a:hover {
-    color: #4d7de7;
+    color: #000b1d;
 }
 
-.breadcrumb li::after {
-    content: " > ";
-    color: #333;
-    margin: 0 5px;
+.breadcrumb li span {
+    margin: 0 8px;
+    color: #999;
 }
 
-.breadcrumb li:last-child::after {
-    content: "";
-}
-
-.breadcrumb li a.active {
-    color: #2463d1;
-}
-
-.navbar img {
-    width: 80px;
+.breadcrumb .active {
+    font-weight: bold;
+    color: #000;
 }
 
 .mt {
-    margin-right: 70px;
+    margin-right: 40px;
 }
 
 .container {
-    width: 80%;
-    margin: auto;
+    max-width: 800px;
+    margin: 20px auto;
     padding: 20px;
-    margin-top: 80px;
-}
-.btn {
-    display: inline-block;
-    padding: 10px 15px;
-    margin: 5px;
-    text-decoration: none;
-    color: white;
-    background-color: #007BFF;
-    border-radius: 5px;
-}
-.btn-secondary {
-    background-color: #6c757d;
-}
-.footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 15px;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-}
-.job-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-.job-description {
-    flex: 2;
 }
 
-span{
-    font-style: italic;
+.job-header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
 }
-.company-logo img {
-    max-width: 150px;
-    border-radius: 5px;
+
+.job-header img {
+    height: 200px !important;
+    width: auto;
+}
+
+.apply-buttons {
+    margin: 15px 0;
+}
+
+.apply, .home {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.apply {
+    background-color: #001f54;
+    color: white;
+    margin-right: 10px;
+}
+
+.home {
+    background-color: #e0e0e0;
+    color: black;
+}
+
+.job-desc {
+    margin-top: 20px;
+}
+
+.job-desc h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.job-desc ul {
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.job-desc li {
+    margin-bottom: 8px;
+}
+
+.job-requirements {
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.job-requirements h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.job-requirements ul {
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.job-requirements li {
+    margin-bottom: 8px;
 }

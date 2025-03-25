@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Portal Indonesia</title>
     <link rel="stylesheet" href="styles/beranda.css">
 </head>
+
 <body>
     <nav class="navbar">
-        <a href="index.html"><img src="/assets/logo website/logo 3.png" alt="Logo Web"></a>
-        <ul class="breadcrumb mt">
-            <li><a href="index.html" class="active">Beranda</a></li>
-        </ul>
+        <a href="index.html" class="logo"><img src="/assets/logo website/jobseeker.png" alt="Logo Web"></a>
+        <div class="nav-right">
+            <a href="login.html"><button class="outline-button">Masuk</button></a>
+            <ul class="breadcrumb">
+                <li><a href="index.html" class="nav-item active">Beranda</a></li>
+                <li><span></span></li>
+            </ul>
+        </div>
     </nav>
-    
+
     <div class="search-box">
         <form>
             <div class="search-group">
@@ -41,108 +47,78 @@
     </div>
     <div class="job-list">
         <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 1.png" alt="Logo Tech Corp">
+            <div class="job-logo-container">
+                <img src="/assets/logo perusahaan/logo 1.png" alt="Logo Tech Corp">
+            </div>
             <h3>Frontend Developer</h3>
-            <p>Kategori: IT</p>
-            <p>Perusahaan: <span>Tech Corp</span></p>
-            <p>Jenis Pekerjaan: Remote</p>
-            <p>Lokasi: Jakarta, Indonesia</p>
-            <p>Gaji: Rp 8.000.000 - Rp 12.000.000</p>
-            <a href="/detail-html/tech_crop.html">Lihat Detail</a>
+            <p class="corp">Tech Corp</p>
+            <p>IT</p>
+            <p>Jakarta, Indonesia</p>
+            <p>Rp 8.000.000 - Rp 12.000.000 per month</p>
+            <p>(Remote)</p>
+            <div class="job-button-container">
+                <a href="/detail-html/tech_crop.html">Lihat Detail</a>
+            </div>
         </div>
 
         <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 2.png" alt="Logo Code Labs">
+            <div class="job-logo-container">
+                <img src="/assets/logo perusahaan/logo 2.png" alt="Logo Code Labs">
+            </div>
             <h3>Backend Developer</h3>
-            <p>Kategori: IT</p>
-            <p>Perusahaan: <span>Code Labs</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Yogyakarta, Indonesia</p>
-            <p>Gaji: Rp 5.000.000 - Rp 8.000.000</p>
+            <p class="corp">Code Labs</p>
+            <p>IT</p>
+            <p>Yogyakarta, Indonesia</p>
+            <p>Rp 5.000.000 - Rp 8.000.000 per month</p>
+            <p>(Full-time)</p>
             <a href="/detail-html/code_labs.html">Lihat Detail</a>
         </div>
 
         <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 3.png" alt="Logo Creative Studio">
+            <div class="job-logo-container">
+                <img src="/assets/logo perusahaan/logo 3.png" alt="Logo Creative Studio">
+            </div>
             <h3>UI/UX Designer</h3>
-            <p>Kategori: Desain</p>
-            <p>Perusahaan: <span>Creative Studio</span></p>
-            <p>Jenis Pekerjaan: Freelance</p>
-            <p>Lokasi: Surabaya, Indonesia</p>
-            <p>Gaji: Rp 1.700.000 - Rp 3.000.000</p>
+            <p class="corp">Creative Studio</p>
+            <p>Desain</p>
+            <p>Surabaya, Indonesia</p>
+            <p>Rp 1.700.000 - Rp 3.000.000 per month</p>
+            <p>(Freelance)</p>
             <a href="/detail-html/creative_studio.html">Lihat Detail</a>
         </div>
 
         <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 4.png" alt="Logo Jogja Mart">
+            <div class="job-logo-container">
+                <img src="/assets/logo perusahaan/logo 4.png" alt="Logo Jogja Mart">
+            </div>
             <h3>Kasir</h3>
-            <p>Kategori: Ritel</p>
-            <p>Perusahaan: <span>Jogja Mart</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Yogyakarta, Indonesia</p>
-            <p>Gaji: Rp 2.000.000 - Rp 3.500.000</p>
+            <p class="corp">Jogja Mart</p>
+            <p>Ritel</p>
+            <p>Yogyakarta, Indonesia</p>
+            <p>Rp 2.000.000 - Rp 3.500.000 per month</p>
+            <p>(Full-time)</p>
             <a href="/detail-html/jogja_mart.html">Lihat Detail</a>
-        </div>
-
-        <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 5.png" alt="Logo Coffee Shop">
-            <h3>Barista</h3>
-            <p>Kategori: Food & Beverage</p>
-            <p>Perusahaan: <span>Zare Coffee</span></p>
-            <p>Jenis Pekerjaan: Part-time</p>
-            <p>Lokasi: Bandung, Indonesia</p>
-            <p>Gaji: Rp 1.500.000 - Rp 2.000.000 per bulan</p>
-            <a href="/detail-html/zare_coffe.html">Lihat Detail</a>
-        </div>            
-
-        <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 6.png" alt="Logo Honda">
-            <h3>Marketing Excetuvie</h3>
-            <p>Kategori: Pemasaran</p>
-            <p>Perusahaan: <span>Honda</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Yogyakarta, Indonesia</p>
-            <p>Gaji: Rp 4.000.000 - Rp 6.700.000</p>
-            <a href="/detail-html/honda.html">Lihat Detail</a>
-        </div>
-
-        <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 7.png" alt="Logo Bank BCA">
-            <h3>Satpam</h3>
-            <p>Kategori: Keamanan</p>
-            <p>Perusahaan: <span>Bank BCA</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Yogyakarta, Indonesia</p>
-            <p>Gaji: Rp 2.800.000 - Rp 3.500.000 per bulan</p>
-            <a href="/detail-html/bca.html">Lihat Detail</a>
-        </div>
-        
-        <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 8.png" alt="Logo Bank BRI">
-            <h3>Teller</h3>
-            <p>Kategori: Perbankan</p>
-            <p>Perusahaan: <span>Bank BRI</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Bandung, Indonesia</p>
-            <p>Gaji: Rp 3.000.000 - Rp 6.500.000 per bulan</p>
-            <a href="/detail-html/bri.html">Lihat Detail</a>
-        </div>
-
-        <div class="job-card">
-            <img src="/assets/logo perusahaan/logo 9.png" alt="Logo Shopee">
-            <h3>Kurir</h3>
-            <p>Kategori: Pengiriman Barang</p>
-            <p>Perusahaan: <span>Shopee</span></p>
-            <p>Jenis Pekerjaan: Full-time</p>
-            <p>Lokasi: Solo, Indonesia</p>
-            <p>Gaji: Rp 1.500.000 - Rp 2.400.000</p>
-            <a href="/detail-html/shopee.html">Lihat Detail</a>
         </div>
     </div>
 
     <footer class="footer">
-        <p>&copy; 2024 Job Seeker Indonesia</p>
-        <p>&copy; Yohanes Nevan, Michael Hosea, Jonathan Satriani</p>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>JobSeeker</h3>
+                <p>Temukan pekerjaan impianmu dengan mudah dan cepat.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Menu</h4>
+                <ul>
+                    <li><a href="#">Beranda</a></li>
+                    <li><a href="#">Lowongan</a></li>
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Kontak</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-copy">&copy; 2025 JobSeeker. All rights reserved.</p>
     </footer>
 </body>
+
 </html>
