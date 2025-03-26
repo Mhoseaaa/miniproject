@@ -126,74 +126,35 @@ main {
 }
 
 .job-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: #999 2px solid;
     width: 600px;
-    transition: box-shadow  0.3s ease-in-out;
+    transition: border  0.3s ease-in-out;
 }
 
 .job-card:hover {
-    box-shadow: 0 2px 10px #001f54;
+    border: solid 2px #001f54;
 }
 
 .job-card p {
     font-size: 14px;
     color: #666;
-    margin: 5px 0;
+    margin: 7px 0;
 }
 
 .corp {
     font-size: 14px;
     font-weight: bold;
     color: #555;
-    margin-top: 5px;
+    margin-top: -5px !important;
 }
-
-.job-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.job-details {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    justify-content: space-between;
-    height: 100%;
-}
-
-.job-details p {
-    font-size: 14px;
-    color: #555;
-    text-align: left;
-    margin-bottom: auto;
-}
-
-.job-details h3 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-}
-
-.job-details a {
-    display: inline-block;
-    padding: 8px 12px;
-    background-color: #001f54;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    text-align: center;
-    margin-top: 10px;
-}
-
 
 .job-card img {
     width: 80px;
@@ -202,10 +163,22 @@ main {
 }
 
 .job-logo-container {
-    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+}
+
+.job-info {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.job-header {
+    display: flex;
     align-items: center;
+    gap: 15px;
 }
 
 .job-card h5 {
@@ -227,6 +200,52 @@ main {
 .job-card a:hover {
     background-color: #000e27;
 }
+
+.menu-container {
+    position: absolute;
+    top: 14px;
+    right: 10px;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    color: #333;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    list-style: none;
+    padding: 10px;
+    display: none;
+    min-width: 120px;
+}
+
+.menu-container:hover .dropdown-menu,
+.menu-button:focus + .dropdown-menu {
+    display:inline-block;
+}
+
+.dropdown-menu li a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    transition: background 0.3s;
+}
+
+.dropdown-menu li a:hover {
+    background-color: #000b1d;
+}
+
 
 /* Styling untuk Search Box */
 .search-box {
