@@ -135,7 +135,7 @@ main {
     padding: 15px;
     border-radius: 8px;
     border: #999 2px solid;
-    width: 600px;
+    width: 500px;
     transition: border  0.3s ease-in-out;
 }
 
