@@ -1,29 +1,57 @@
 <?php
 // login-user.php
 session_start();
+include 'koneksi.php'; // Pastikan file koneksi database sudah ada
 
 // Check if user is already logged in
 if(isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    $redirect = $_GET['redirect'] ?? 'dashboard_user.php';
+    header("Location: $redirect");
     exit;
 }
 
 // Handle login form submission
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Add your authentication logic here
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    // Example authentication (replace with your actual logic)
-    if($email === 'user@example.com' && $password === 'password') {
-        $_SESSION['user_id'] = 1;
-        $_SESSION['user_email'] = $email;
-        header("Location: index.php");
-        exit;
+    // Validasi input
+    if(empty($email) || empty($password)) {
+        $error = "Email dan password harus diisi";
     } else {
-        $error = "Email atau password salah";
+        // Query ke database untuk mencari user
+        $stmt = $conn->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            
+            // Verifikasi password (asumsi password di database di-hash)
+            if(password_verify($password, $user['password'])) {
+                // Set session
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_email'] = $user['email'];
+                
+                // Handle redirect after login
+                $redirect = $_GET['redirect'] ?? 'dashboard_user.php';
+                header("Location: $redirect");
+                exit;
+            } else {
+                $error = "Email atau password salah";
+            }
+        } else {
+            $error = "Email atau password salah";
+        }
+        
+        $stmt->close();
     }
 }
+
+// Get redirect URL if exists
+$redirect = $_GET['redirect'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -314,7 +342,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="error-message"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         
-        <form method="POST" action="login-user.php">
+        <form method="POST" action="login_user.php<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>">
             <div class="form-group">
                 <label for="email">Alamat Email</label>
                 <input type="email" id="email" name="email" required placeholder="contoh@email.com">

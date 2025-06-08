@@ -37,7 +37,7 @@ if ($row = $result->fetch_assoc()) {
         <?php if(isset($_SESSION['user_id'])): ?>
             <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
         <?php else: ?>
-            <a href="login_user.php?redirect=lamar.php?slug=<?= $slug ?>" class="apply-button">Login untuk Melamar</a>
+            <a href="login_user.php?redirect=dashboard_user.php?slug=<?= $slug ?>" class="apply-button">Login untuk Melamar</a>
         <?php endif; ?>
     </div>
 </div>
