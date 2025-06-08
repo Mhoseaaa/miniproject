@@ -1,6 +1,6 @@
 <?php
 // detail_ajax.php
-
+session_start();
 include 'koneksi.php';
 
 $slug = $_GET['slug'] ?? '';
@@ -34,7 +34,11 @@ if ($row = $result->fetch_assoc()) {
         <p><?= nl2br(htmlspecialchars($row['kualifikasi'])) ?></p>
         <h3>Gaji</h3>
         <p><?= htmlspecialchars($row['gaji']) ?></p>
-        <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
+        <?php if(isset($_SESSION['user_id'])): ?>
+            <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
+        <?php else: ?>
+            <a href="login_user.php?redirect=lamar.php?slug=<?= $slug ?>" class="apply-button">Login untuk Melamar</a>
+        <?php endif; ?>
     </div>
 </div>
 <?php
