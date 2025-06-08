@@ -1,26 +1,41 @@
+/* GLOBAL STYLING */
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f8f9fa;
+    overflow-x: hidden;
+    padding-top: 60px; /* Sesuaikan dengan tinggi navbar */
 }
 
-body,
 main {
     overflow-x: hidden;
+}
+
+/* NAVBAR */
+.navbar-container {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .navbar {
     display: flex;
     align-items: center;
-    justify-content: space-between; 
+    justify-content: space-between;
     padding: 5px 15px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .nav-right {
     display: flex;
     align-items: center;
-    gap: 20px; 
+    gap: 20px;
 }
 
 .nav-item {
@@ -45,10 +60,7 @@ main {
     transition: transform 0.3s ease-in-out;
 }
 
-.nav-item.active::after {
-    transform: scaleX(1);
-}
-
+.nav-item.active::after,
 .nav-item:hover::after {
     transform: scaleX(1);
 }
@@ -60,8 +72,8 @@ main {
 
 .outline-button {
     background: white;
-    color: #001f54; 
-    border: 2px solid #001f54; 
+    color: #001f54;
+    border: 2px solid #001f54;
     padding: 8px 16px;
     font-size: 16px;
     border-radius: 5px;
@@ -75,6 +87,7 @@ main {
     color: white;
 }
 
+/* BREADCRUMB */
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -111,6 +124,7 @@ main {
     color: #000;
 }
 
+/* LAYOUT */
 .container {
     width: 80%;
     margin: auto;
@@ -118,14 +132,65 @@ main {
     margin-top: 80px;
 }
 
+.main-container {
+    display: flex;
+    height: 90vh;
+    padding: 20px;
+}
+
 .job-list {
+    width: 60%;
+    overflow-y: auto;
+    border-right: 0 solid #ccc;
+    padding-right: 10px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); /* Lebar card lebih besar */
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     gap: 20px;
     padding: 20px;
 }
 
+.job-details {
+  width: 65%;
+  padding: 40px;
+  background-color: #f5f6f8;
+  min-height: 400px;
+  border-radius: 12px;
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+}
+
+.job-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #333;
+}
+
+.job-placeholder h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.job-placeholder p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.job-placeholder img {
+  width: 165px;
+  border-radius: 50%;
+  background-color: #ffeaf5;
+  padding: 4px;
+
+  margin-left: 90%;
+}
+
+/* JOB CARD - HOVER ONLY VERSION */
 .job-card {
+    cursor: pointer;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -133,14 +198,24 @@ main {
     align-items: flex-start;
     background: white;
     padding: 15px;
-    border-radius: 8px;
-    border: #999 2px solid;
+    border-radius: 20px;
     width: 500px;
-    transition: border  0.3s ease-in-out;
+    height: 260px;
+    
+    /* Border standar */
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    
+    /* Transisi hanya untuk border dan shadow */
+    transition: 
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 .job-card:hover {
-    border: solid 2px #001f54;
+    /* Hanya ubah warna border dan shadow */
+    border-color: #001f54;
+    box-shadow: 0 2.5px 14px rgba(0, 31, 84, 0.12);
 }
 
 .job-card p {
@@ -201,6 +276,7 @@ main {
     background-color: #000e27;
 }
 
+/* MENU DROPDOWN */
 .menu-container {
     position: absolute;
     top: 14px;
@@ -232,7 +308,7 @@ main {
 
 .menu-container:hover .dropdown-menu,
 .menu-button:focus + .dropdown-menu {
-    display:inline-block;
+    display: inline-block;
 }
 
 .dropdown-menu li a {
@@ -246,8 +322,7 @@ main {
     background-color: #000b1d;
 }
 
-
-/* Styling untuk Search Box */
+/* SEARCH BOX */
 .search-box {
     background-color: #001f54;
     background-size: cover;
@@ -266,13 +341,9 @@ main {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    /* Pusatkan elemen */
     gap: 15px;
-    /* Tambahkan jarak antar elemen */
     max-width: 1200px;
-    /* Batasi lebar konten di tengah */
     margin: auto;
-    /* Pusatkan konten secara horizontal */
 }
 
 .search-group {
@@ -304,7 +375,6 @@ main {
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
-    /* Pastikan padding tidak memengaruhi lebar */
 }
 
 .search-field input::placeholder {
@@ -332,6 +402,7 @@ button[type="submit"]:hover {
     margin-right: 70px;
 }
 
+/* FOOTER */
 .footer {
     background-color: #001f54;
     color: white;

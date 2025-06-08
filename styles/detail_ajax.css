@@ -1,0 +1,79 @@
+.job-detail {
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        text-align: left;
+    }
+    .detail-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+    }
+    .detail-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+    .detail-header h4 {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0 0 10px 0;
+        color: #3498db;
+    }
+    .detail-header p {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin: 0;
+    }
+    .detail-body h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 25px 0 10px 0;
+    }
+    .detail-body p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .apply-button {
+        display: inline-block;
+        background-color: #ff007f;
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 500;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    .apply-button:hover {
+        background-color: #e60073;
+    }
+    .edit-button {
+        display: inline-block;
+        background-color: gold;
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 500;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    .edit-button:hover {
+        background-color: goldenrod
+    }

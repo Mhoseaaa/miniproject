@@ -28,7 +28,7 @@ $result = $conn->query($sql);
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Portal Indonesia</title>
-  <link rel="stylesheet" href="/miniproject/styles/beranda.css?v=<?= time(); ?>">
+  <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
 </head>
 <body>
 

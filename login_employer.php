@@ -1,52 +1,48 @@
 <?php
-// === Koneksi ke Database ===
-include 'koneksi.php';
+// login_employer.php
+session_start();
+require_once 'koneksi.php';
 
-// === Fungsi Format Rupiah ===
-function formatRupiah($angka) {
-    return 'Rp ' . number_format($angka, 0, ',', '.');
+// Check if employer is already logged in
+if(isset($_SESSION['employer_id'])) {
+    header("Location: employer_dashboard.php");
+    exit;
 }
 
-// === Proses Form Submit ===
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Ambil Data dari Form
-    $judul         = $_POST['judul'];
-    $perusahaan    = $_POST['perusahaan'];
-    $kategori      = $_POST['kategori'];
-    $lokasi        = $_POST['lokasi'];
-    $gaji_min      = (int) str_replace('.', '', $_POST['gaji_min']);
-    $gaji_max      = (int) str_replace('.', '', $_POST['gaji_max']);
-    $tipe          = $_POST['tipe'];
-    $deskripsi     = $_POST['deskripsi'];
-    $kualifikasi   = $_POST['kualifikasi'];
-    $batas_lamaran = $_POST['batas_lamaran'];
-
-    $slug       = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $judul), '-'));
-    $created_at = date("Y-m-d H:i:s");
-    $gaji       = formatRupiah($gaji_min) . " - " . formatRupiah($gaji_max) . " per month";
-
-    // === Upload Logo ===
-    $upload_folder_rel = "assets/logo_perusahaan/";
-    $upload_folder_abs = __DIR__ . '/' . $upload_folder_rel;
-
-    if (!is_dir($upload_folder_abs)) {
-        mkdir($upload_folder_abs, 0777, true);
-    }
-
-    $logo_file = basename($_FILES["logo"]["name"]);
-    $logo_name = time() . "-" . preg_replace('/\s+/', '-', $logo_file);
-    $logo_path_rel = $upload_folder_rel . $logo_name;
-    $logo_path_abs = $upload_folder_abs . $logo_name;
-
-    if (move_uploaded_file($_FILES["logo"]["tmp_name"], $logo_path_abs)) {
-        // Simpan ke database
-        $stmt = $conn->prepare("INSERT INTO lowongan (judul, perusahaan, kategori, lokasi, gaji, tipe, deskripsi, kualifikasi, batas_lamaran, slug, logo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssssssss", $judul, $perusahaan, $kategori, $lokasi, $gaji, $tipe, $deskripsi, $kualifikasi, $batas_lamaran, $slug, $logo_path_rel, $created_at);
-        $stmt->execute();
-
-        echo "<p style='color:green;'>Lowongan berhasil ditambahkan.</p>";
+// Handle login form submission
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    // Validasi
+    if(empty($email) || empty($password)) {
+        $error = "Email dan password harus diisi";
     } else {
-        echo "<p style='color:red;'>Gagal mengunggah logo.</p>";
+        // Cek employer di database
+        $stmt = $conn->prepare("SELECT id, company_name, email, password FROM employers WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if($result->num_rows === 1) {
+            $employer = $result->fetch_assoc();
+            
+            // Verifikasi password
+            if(password_verify($password, $employer['password'])) {
+                // Login sukses
+                $_SESSION['employer_id'] = $employer['id'];
+                $_SESSION['employer_name'] = $employer['company_name'];
+                $_SESSION['employer_email'] = $employer['email'];
+                
+                header("Location: employer_dashboard.php");
+                exit;
+            } else {
+                $error = "Email atau password salah";
+            }
+        } else {
+            $error = "Email atau password salah";
+        }
+        $stmt->close();
     }
 }
 ?>
@@ -311,21 +307,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
     </style>
-    <script>
-        // Format input rupiah otomatis
-        function formatRupiahInput(el) {
-            el.addEventListener('input', function() {
-                let value = this.value.replace(/\D/g, '');
-                value = new Intl.NumberFormat('id-ID').format(value);
-                this.value = value;
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            formatRupiahInput(document.getElementById('gaji_min'));
-            formatRupiahInput(document.getElementById('gaji_max'));
-        });
-    </script>
 </head>
 <body>
 
@@ -349,10 +330,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <!-- Login Form for Employers -->
 <div class="register-wrapper">
     <div class="jobseeker-link-container">
+        <a href="login-user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
     </div>
     
     <div class="register-container">
-        <h1 class="register-title">Tambah Lowongan Pekerjaan</h1>
+        <h1 class="register-title">Masuk Sebagai Employer</h1>
         
         <?php if(isset($error)): ?>
             <div class="error-message" style="text-align: center; margin-bottom: 20px;">
@@ -360,100 +342,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
         <?php endif; ?>
         
-        <form method="POST" enctype="multipart/form-data" onsubmit="prepareGaji()">
+        <form method="POST" action="login_employer.php">
             <div class="form-group">
-                <label>Judul:</label><br>
-                <input type="text" name="judul" required>
-            </div>
-
-            <div class="form-group">
-                <label>Perusahaan:</label><br>
-                <input type="text" name="perusahaan" required>
+                <label for="email">Email Perusahaan</label>
+                <input type="email" id="email" name="email" required placeholder="contoh@perusahaan.com">
             </div>
             
             <div class="form-group">
-                <label>Kategori:</label><br>
-                <select name="kategori" required>
-                    <option value="">-- Pilih Kategori --</option>
-                    <option value="IT">IT</option>
-                    <option value="Desain">Desain</option>
-                    <option value="Ritel">Ritel</option>
-                    <option value="Food & Beverage">Food & Beverage</option>
-                    <option value="Pendidikan">Pendidikan</option>
-                    <option value="Kesehatan">Kesehatan</option>
-                    <option value="Keuangan">Keuangan</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Teknik">Teknik</option>
-                    <option value="Manufaktur">Manufaktur</option>
-                    <option value="Transportasi">Transportasi</option>
-                    <option value="Administrasi">Administrasi</option>
-                    <option value="Hukum">Hukum</option>
-                </select>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Masukkan password">
             </div>
-
-            <div class="form-group">
-                <label>Lokasi:</label><br>
-                <input type="text" name="lokasi" required>
-            </div>
-
-            <div class="form-group"> 
-                <label>Gaji Minimum:</label><br>
-                <input type="text" id="gaji_min" name="gaji_min" placeholder="Contoh: 1.700.000" required>
-            </div>
-
-            <div class="form-group">
-                <label>Gaji Maksimum:</label><br>
-                <input type="text" id="gaji_max" name="gaji_max" placeholder="Contoh: 3.000.000" required>
-            </div>
-
-            <div class="form-group">
-                <label>Tipe:</label><br>
-                <select name="tipe" required>
-                    <option value="Full-time">Full-time</option>
-                    <option value="Part-time">Part-time</option>
-                    <option value="Remote">Remote</option>
-                    <option value="Freelance">Freelance</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Deskripsi Pekerjaan:</label><br>
-                <textarea name="deskripsi" rows="5" cols="50" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Kualifikasi:</label><br>
-                <textarea name="kualifikasi" rows="5" cols="50" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Batas Lamaran:</label><br>
-                <input type="date" name="batas_lamaran" required>
-            </div>
-
-            <div class="form-group">
-                <label>Upload Logo:</label><br>
-                <input type="file" name="logo" accept="image/*" required>
-            </div>
-
             
-            <button type="submit" class="register-button">Upload</button>
-
-            
-
+            <button type="submit" class="register-button">MASUK</button>
         </form>
-
-        <script>
-                function prepareGaji() {
-                    const min = document.getElementById('gaji_min');
-                    const max = document.getElementById('gaji_max');
-                    min.value = min.value.replace(/\./g, '');
-                    max.value = max.value.replace(/\./g, '');
-                }
-        </script>
         
         <div class="register-footer">
-            
+            Belum punya akun employer? <a href="register_employer.php">Daftar disini</a><br>
+            <a href="forgot-password.php">Lupa password?</a>
         </div>
     </div>
 </div>

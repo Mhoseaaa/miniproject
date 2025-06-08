@@ -29,7 +29,7 @@ $result = $conn->query($sql);
 <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
 <style>
 
-  /* GLOBAL STYLING */
+    /* GLOBAL STYLING */
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -488,7 +488,6 @@ button[type="submit"]:hover {
     opacity: 0.7;
 }
 
-
 </style>
 </head>
 <body>
@@ -500,7 +499,7 @@ button[type="submit"]:hover {
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="login_user.php"><button class="outline-button">Masuk</button></a>
+            <a href="profile_employer.php"><button class="outline-button">Profile</button></a>
             <ul class="breadcrumb">
                 <li><a href="index.php" class="nav-item active">Beranda</a></li>
             </ul>
@@ -606,7 +605,7 @@ jobCards.forEach(card => {
     if (e.target.closest('.menu-container')) return;
 
     const slug = card.getAttribute('data-slug');
-    fetch(`detail_ajax.php?slug=${slug}`)
+    fetch(`detail_employer.php?slug=${slug}`)
       .then(res => res.text())
       .then(html => {
         jobDetail.innerHTML = html;
