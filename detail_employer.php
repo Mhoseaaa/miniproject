@@ -35,6 +35,7 @@ if ($row = $result->fetch_assoc()) {
         <h3>Gaji</h3>
         <p><?= htmlspecialchars($row['gaji']) ?></p>
         <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
+        <a href="edit_employer.php?slug=<?= $slug ?>" class="edit-button">Edit</a>
     </div>
 </div>
 <?php

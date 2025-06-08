@@ -1,0 +1,337 @@
+/* ====================== */
+/* ===== Reset CSS ===== */
+/* ====================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "DM Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+body {
+  background-color: #e8f2fc;
+  min-height: 100vh;
+  padding-top: 70px; /* Ruang untuk navbar fixed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================== */
+/* ===== Kontainer Utama UI ===== */
+/* ============================== */
+.container {
+  display: flex;
+  width: 900px;
+  height: 550px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+/* ===== Panel Kiri ===== */
+.left-panel {
+  flex: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6f42c1 0%, #001f54 100%); /* fallback kalau gambar gagal dimuat */
+  overflow: hidden;
+}
+
+.left-panel .bg-image {
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+}
+
+
+/* ===== Panel Kanan ===== */
+.right-panel {
+  flex: 3;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== Kotak Form ===== */
+.form-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* ============================= */
+/* ===== Toggle Login/Register ===== */
+.form-toggle {
+  display: flex;
+  width: 100%;
+  height: 45px;
+  border: 1px solid #ddd;
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  background: #f5f5f5;
+}
+
+.form-toggle button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.form-toggle button.active {
+  background-color: #6f42c1;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ====================== */
+/* ===== Form Styles ===== */
+.form-container {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+}
+
+form {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+form.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #6f42c1;
+  box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+}
+
+/* ===== Tombol Submit ===== */
+.submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #6f42c1;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: #5a3291;
+  transform: translateY(-2px);
+}
+
+/* ===== Footer ===== */
+.form-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.form-footer a {
+  color: #6f42c1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.form-footer a:hover {
+  color: #4e2f88;
+  text-decoration: underline;
+}
+
+/* =========================== */
+/* ===== Navbar Styling ===== */
+/* =========================== */
+.navbar-container {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 15px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar .logo img {
+  width: 150px;
+  height: auto;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar .outline-button {
+  background: white;
+  color: #001f54;
+  border: 2px solid #001f54;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.navbar .outline-button:hover {
+  background: #001f54;
+  color: white;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+}
+
+.breadcrumb li {
+  display: flex;
+  align-items: center;
+  color: #555;
+}
+
+.breadcrumb li a {
+  text-decoration: none;
+  color: #001f54;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.breadcrumb li a:hover {
+  color: #000b1d;
+}
+
+.breadcrumb li span {
+  margin: 0 8px;
+  color: #999;
+}
+
+.nav-item {
+  position: relative;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+  padding-bottom: 5px;
+}
+
+.nav-item::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #001f54;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: scaleX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav-item.active::after,
+.nav-item:hover::after {
+  transform: scaleX(1);
+}
+
+/* ============================== */
+/* ===== Responsiveness ===== */
+/* ============================== */
+@media (max-width: 992px) {
+  .container {
+    width: 95%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .left-panel {
+    height: 200px;
+    flex: none;
+  }
+
+  .right-panel {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    padding-top: 60px;
+  }
+
+  .form-box {
+    padding: 25px 20px;
+  }
+
+  .form-toggle {
+    height: 40px;
+    margin-bottom: 20px;
+  }
+
+  .form-toggle button {
+    font-size: 14px;
+  }
+}

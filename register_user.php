@@ -1,52 +1,79 @@
 <?php
-// === Koneksi ke Database ===
+session_start();
 include 'koneksi.php';
 
-// === Fungsi Format Rupiah ===
-function formatRupiah($angka) {
-    return 'Rp ' . number_format($angka, 0, ',', '.');
+$errors = [];
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
 }
 
-// === Proses Form Submit ===
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Ambil Data dari Form
-    $judul         = $_POST['judul'];
-    $perusahaan    = $_POST['perusahaan'];
-    $kategori      = $_POST['kategori'];
-    $lokasi        = $_POST['lokasi'];
-    $gaji_min      = (int) str_replace('.', '', $_POST['gaji_min']);
-    $gaji_max      = (int) str_replace('.', '', $_POST['gaji_max']);
-    $tipe          = $_POST['tipe'];
-    $deskripsi     = $_POST['deskripsi'];
-    $kualifikasi   = $_POST['kualifikasi'];
-    $batas_lamaran = $_POST['batas_lamaran'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    $slug       = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $judul), '-'));
-    $created_at = date("Y-m-d H:i:s");
-    $gaji       = formatRupiah($gaji_min) . " - " . formatRupiah($gaji_max) . " per month";
-
-    // === Upload Logo ===
-    $upload_folder_rel = "assets/logo_perusahaan/";
-    $upload_folder_abs = __DIR__ . '/' . $upload_folder_rel;
-
-    if (!is_dir($upload_folder_abs)) {
-        mkdir($upload_folder_abs, 0777, true);
+    // Validasi
+    if (empty($name)) {
+        $errors['name'] = "Nama lengkap harus diisi";
     }
 
-    $logo_file = basename($_FILES["logo"]["name"]);
-    $logo_name = time() . "-" . preg_replace('/\s+/', '-', $logo_file);
-    $logo_path_rel = $upload_folder_rel . $logo_name;
-    $logo_path_abs = $upload_folder_abs . $logo_name;
+    if (empty($email)) {
+        $errors['email'] = "Email harus diisi";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Format email tidak valid";
+    }
 
-    if (move_uploaded_file($_FILES["logo"]["tmp_name"], $logo_path_abs)) {
-        // Simpan ke database
-        $stmt = $conn->prepare("INSERT INTO lowongan (judul, perusahaan, kategori, lokasi, gaji, tipe, deskripsi, kualifikasi, batas_lamaran, slug, logo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssssssss", $judul, $perusahaan, $kategori, $lokasi, $gaji, $tipe, $deskripsi, $kualifikasi, $batas_lamaran, $slug, $logo_path_rel, $created_at);
-        $stmt->execute();
+    if (empty($password)) {
+        $errors['password'] = "Password harus diisi";
+    } elseif (strlen($password) < 6) {
+        $errors['password'] = "Password minimal 6 karakter";
+    }
 
-        echo "<p style='color:green;'>Lowongan berhasil ditambahkan.</p>";
-    } else {
-        echo "<p style='color:red;'>Gagal mengunggah logo.</p>";
+    if ($password !== $confirm_password) {
+        $errors['confirm_password'] = "Password tidak cocok";
+    }
+
+    // Cek apakah email sudah digunakan
+    if (empty($errors)) {
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        if ($stmt === false) {
+            die("Error preparing statement: " . $conn->error);
+        }
+        
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            die("Error executing statement: " . $stmt->error);
+        }
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $errors['email'] = "Email sudah terdaftar";
+        }
+        $stmt->close();
+    }
+
+    // Simpan ke database
+    if (empty($errors)) {
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+        if ($stmt === false) {
+            die("Error preparing statement: " . $conn->error);
+        }
+        
+        $stmt->bind_param("sss", $name, $email, $hashed_password);
+
+        if ($stmt->execute()) {
+            $_SESSION['registration_success'] = true;
+            header("Location: login_user.php");
+            exit;
+        } else {
+            // Tambahkan pesan error yang lebih spesifik
+            $errors['general'] = "Gagal mendaftar. Error: " . $stmt->error;
+        }
+        $stmt->close();
     }
 }
 ?>
@@ -56,22 +83,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Employer - Job Portal Indonesia</title>
-    <link rel="stylesheet" href="styles/logreg_employer.css?v=<?= time(); ?>">
+    <title>Daftar - Job Portal Indonesia</title>
+    <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
-
         .register-wrapper {
             max-width: 550px;
             margin: 80px auto 0;
         }
         
-        .jobseeker-link-container {
+        .employer-link-container {
             text-align: right;
             margin-bottom: 10px;
         }
         
-        .jobseeker-link {
+        .employer-link {
             color: #001f54;
             font-weight: bold;
             text-decoration: none;
@@ -81,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             margin-right:-50px;
         }
 
-        .jobseeker-link:hover {
+        .employer-link:hover {
             text-decoration: underline;
         }
 
@@ -111,9 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #333;
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -122,9 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             transition: border 0.3s;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             border-color: #001f54;
             outline: none;
         }
@@ -244,7 +266,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         @media (max-width: 768px) {
-            .jobseeker-link-container {
+            .employer-link-container {
                 text-align: center;
                 margin-bottom: 20px;
             }
@@ -309,23 +331,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             font-size: 14px;
             opacity: 0.7;
         }
-
     </style>
-    <script>
-        // Format input rupiah otomatis
-        function formatRupiahInput(el) {
-            el.addEventListener('input', function() {
-                let value = this.value.replace(/\D/g, '');
-                value = new Intl.NumberFormat('id-ID').format(value);
-                this.value = value;
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            formatRupiahInput(document.getElementById('gaji_min'));
-            formatRupiahInput(document.getElementById('gaji_max'));
-        });
-    </script>
 </head>
 <body>
 
@@ -336,124 +342,67 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="register_employer.php"><button class="outline-button">Daftar</button></a>
+            <a href="login2.php"><button class="outline-button">Masuk</button></a>
             <ul class="breadcrumb">
                 <li><a href="index.php" class="nav-item">Beranda</a></li>
                 <li><span>/</span></li>
-                <li><a href="login_employer.php" class="nav-item active">Masuk Employer</a></li>
+                <li><a href="register_user.php" class="nav-item active">Daftar</a></li>
             </ul>
         </div>
     </nav>
 </div>
 
-<!-- Login Form for Employers -->
+<!-- Registration Form with Employer Link -->
 <div class="register-wrapper">
-    <div class="jobseeker-link-container">
+    <div class="employer-link-container">
+        <a href="register_employer.php" class="employer-link">Apakah Anda mencari karyawan?</a>
     </div>
     
     <div class="register-container">
-        <h1 class="register-title">Tambah Lowongan Pekerjaan</h1>
+        <h1 class="register-title">Buat Akun Baru</h1>
         
-        <?php if(isset($error)): ?>
-            <div class="error-message" style="text-align: center; margin-bottom: 20px;">
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
-        
-        <form method="POST" enctype="multipart/form-data" onsubmit="prepareGaji()">
+        <form method="POST" action="register_user.php">
             <div class="form-group">
-                <label>Judul:</label><br>
-                <input type="text" name="judul" required>
-            </div>
-
-            <div class="form-group">
-                <label>Perusahaan:</label><br>
-                <input type="text" name="perusahaan" required>
+                <label for="name">Nama Lengkap</label>
+                <input type="text" id="name" name="name" required placeholder="Masukkan nama lengkap"
+                       value="<?= htmlspecialchars($_POST['name'] ?? '') ?>">
+                <?php if(isset($errors['name'])): ?>
+                    <div class="error-message"><?= $errors['name'] ?></div>
+                <?php endif; ?>
             </div>
             
             <div class="form-group">
-                <label>Kategori:</label><br>
-                <select name="kategori" required>
-                    <option value="">-- Pilih Kategori --</option>
-                    <option value="IT">IT</option>
-                    <option value="Desain">Desain</option>
-                    <option value="Ritel">Ritel</option>
-                    <option value="Food & Beverage">Food & Beverage</option>
-                    <option value="Pendidikan">Pendidikan</option>
-                    <option value="Kesehatan">Kesehatan</option>
-                    <option value="Keuangan">Keuangan</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Teknik">Teknik</option>
-                    <option value="Manufaktur">Manufaktur</option>
-                    <option value="Transportasi">Transportasi</option>
-                    <option value="Administrasi">Administrasi</option>
-                    <option value="Hukum">Hukum</option>
-                </select>
+                <label for="email">Alamat Email</label>
+                <input type="email" id="email" name="email" required placeholder="contoh@email.com"
+                       value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                <?php if(isset($errors['email'])): ?>
+                    <div class="error-message"><?= $errors['email'] ?></div>
+                <?php endif; ?>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Masukkan password (minimal 6 karakter)">
+                <?php if(isset($errors['password'])): ?>
+                    <div class="error-message"><?= $errors['password'] ?></div>
+                <?php endif; ?>
+
             </div>
 
             <div class="form-group">
-                <label>Lokasi:</label><br>
-                <input type="text" name="lokasi" required>
-            </div>
-
-            <div class="form-group"> 
-                <label>Gaji Minimum:</label><br>
-                <input type="text" id="gaji_min" name="gaji_min" placeholder="Contoh: 1.700.000" required>
-            </div>
-
-            <div class="form-group">
-                <label>Gaji Maksimum:</label><br>
-                <input type="text" id="gaji_max" name="gaji_max" placeholder="Contoh: 3.000.000" required>
-            </div>
-
-            <div class="form-group">
-                <label>Tipe:</label><br>
-                <select name="tipe" required>
-                    <option value="Full-time">Full-time</option>
-                    <option value="Part-time">Part-time</option>
-                    <option value="Remote">Remote</option>
-                    <option value="Freelance">Freelance</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Deskripsi Pekerjaan:</label><br>
-                <textarea name="deskripsi" rows="5" cols="50" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Kualifikasi:</label><br>
-                <textarea name="kualifikasi" rows="5" cols="50" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Batas Lamaran:</label><br>
-                <input type="date" name="batas_lamaran" required>
-            </div>
-
-            <div class="form-group">
-                <label>Upload Logo:</label><br>
-                <input type="file" name="logo" accept="image/*" required>
+                <label for="confirm_password">Konfirmasi Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Ulangi password">
+                <?php if(isset($errors['confirm_password'])): ?>
+                    <div class="error-message"><?= $errors['confirm_password'] ?></div>
+                <?php endif; ?>
             </div>
 
             
-            <button type="submit" class="register-button">Upload</button>
-
-            
-
+            <button type="submit" class="register-button">DAFTAR</button>
         </form>
-
-        <script>
-                function prepareGaji() {
-                    const min = document.getElementById('gaji_min');
-                    const max = document.getElementById('gaji_max');
-                    min.value = min.value.replace(/\./g, '');
-                    max.value = max.value.replace(/\./g, '');
-                }
-        </script>
         
         <div class="register-footer">
-            
+            Sudah punya akun? <a href="login_user.php">Masuk disini</a>
         </div>
     </div>
 </div>

@@ -2,22 +2,22 @@
 // Koneksi ke database
 include 'koneksi.php';
 
-$keyword  = $_GET['keyword'] ?? '';
-$kategori = $_GET['kategori'] ?? '';
-$lokasi   = $_GET['lokasi'] ?? '';
+// $keyword  = $_GET['keyword'] ?? '';
+// $kategori = $_GET['kategori'] ?? '';
+// $lokasi   = $_GET['lokasi'] ?? '';
 
-$sql = "SELECT * FROM lowongan WHERE 1=1";
-if (!empty($keyword)) {
-    $sql .= " AND (judul LIKE '%" . $conn->real_escape_string($keyword) . "%' OR perusahaan LIKE '%" . $conn->real_escape_string($keyword) . "%')";
-}
-if (!empty($kategori)) {
-    $sql .= " AND kategori = '" . $conn->real_escape_string($kategori) . "'";
-}
-if (!empty($lokasi)) {
-    $sql .= " AND lokasi LIKE '%" . $conn->real_escape_string($lokasi) . "%'";
-}
-$sql .= " ORDER BY id DESC";
-$result = $conn->query($sql);
+// $sql = "SELECT * FROM lowongan WHERE 1=1";
+// if (!empty($keyword)) {
+//     $sql .= " AND (judul LIKE '%" . $conn->real_escape_string($keyword) . "%' OR perusahaan LIKE '%" . $conn->real_escape_string($keyword) . "%')";
+// }
+// if (!empty($kategori)) {
+//     $sql .= " AND kategori = '" . $conn->real_escape_string($kategori) . "'";
+// }
+// if (!empty($lokasi)) {
+//     $sql .= " AND lokasi LIKE '%" . $conn->real_escape_string($lokasi) . "%'";
+// }
+// $sql .= " ORDER BY id DESC";
+// $result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -29,7 +29,7 @@ $result = $conn->query($sql);
 <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
 <style>
 
-  /* GLOBAL STYLING */
+    /* GLOBAL STYLING */
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -500,7 +500,7 @@ button[type="submit"]:hover {
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="login_user.php"><button class="outline-button">Masuk</button></a>
+            <a href="login2.php"><button class="outline-button">Masuk</button></a>
             <ul class="breadcrumb">
                 <li><a href="index.php" class="nav-item active">Beranda</a></li>
             </ul>
