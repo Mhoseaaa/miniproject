@@ -11,7 +11,7 @@ if (!isset($_GET['id'])) {
 }
 
 $id = $_GET['id'];
-$query = $conn->prepare("SELECT * FROM lowongan WHERE id = ?");
+$query = $conn->prepare("SELECT * FROM lowongan2 WHERE id = ?");
 $query->bind_param("i", $id);
 $query->execute();
 $result = $query->get_result();

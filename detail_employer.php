@@ -1,16 +1,16 @@
 <?php
-// detail_ajax.php
-
+// detail_ajax.php (versi employer)
+session_start();
 include 'koneksi.php';
 
-$slug = $_GET['slug'] ?? '';
-if (empty($slug)) {
+$id = $_GET['id'] ?? '';
+if (empty($id) || !is_numeric($id)) {
     echo "Data tidak ditemukan.";
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM lowongan WHERE slug = ? LIMIT 1");
-$stmt->bind_param("s", $slug);
+$stmt = $conn->prepare("SELECT * FROM lowongan WHERE id = ? LIMIT 1");
+$stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -33,9 +33,14 @@ if ($row = $result->fetch_assoc()) {
         <h3>Kualifikasi Pekerjaan</h3>
         <p><?= nl2br(htmlspecialchars($row['kualifikasi'])) ?></p>
         <h3>Gaji</h3>
-        <p><?= htmlspecialchars($row['gaji']) ?></p>
-        <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
-        <a href="edit_employer.php?slug=<?= $slug ?>" class="edit-button">Edit</a>
+        <p>Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?></p>
+
+        <?php if (isset($_SESSION['employer_id'])): ?>
+            <div style="margin-top: 20px;">
+                <a href="edit.php?id=<?= $id ?>" style="background-color:gold;color:black;padding:10px 20px;text-decoration:none;border-radius:5px;margin-right:10px;">Edit</a>
+                <a href="hapus.php?id=<?= $id ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus lowongan ini?');" style="background-color:red;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">Hapus</a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 <?php

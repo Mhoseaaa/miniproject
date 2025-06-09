@@ -1,24 +1,25 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['employer_email'])) {
-    header("Location: login_employer.php");
+if (!isset($_SESSION['user_email'])) {
+    header("Location: login_user.php");
     exit;
 }
 
 include 'koneksi.php';
 
-$employerEmail = $_SESSION['employer_email'];
+$userEmail = $_SESSION['user_email'];
 
-$stmt = $conn->prepare("SELECT nama_perusahaan, email, no_telepon, alamat FROM employers WHERE email = ?");
-$stmt->bind_param("s", $employerEmail);
+$stmt = $conn->prepare("SELECT name, email FROM users WHERE email = ?");
+$stmt->bind_param("s", $userEmail);
 $stmt->execute();
 $result = $stmt->get_result();
-$employer = $result->fetch_assoc();
+$user = $result->fetch_assoc();
 
-if (!$employer) {
+if (!$user) {
+    // Kalau user tidak ditemukan, logout
     session_destroy();
-    header("Location: login_employer.php");
+    header("Location: login_user.php");
     exit;
 }
 ?>
@@ -28,7 +29,7 @@ if (!$employer) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Profil Employer</title>
+<title>Profil Saya</title>
 <style>
   /* GLOBAL STYLING */
   body {
@@ -205,42 +206,32 @@ if (!$employer) {
 <!-- Navbar -->
 <div class="navbar-container">
     <nav class="navbar">
-        <a href="dashboard_employer.php" class="logo">
+        <a href="dashboard_user.php" class="logo">
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <span>Halo, <?= htmlspecialchars($employer['nama_perusahaan']) ?></span> |
-            <a href="dashboard_employer.php" class="nav-item">Beranda</a> |
-            <a href="profile_employer.php" class="nav-item active">Profil</a> |
-            <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a> |
+            <span>Halo, <?= htmlspecialchars($user['name']) ?></span> |
+            <a href="profile_user.php" class="nav-item">Profil</a> |
             <a href="logout.php" class="nav-item">Logout</a>
         </div>
     </nav>
 </div>
 
 <div class="profile-container">
-    <h2>Profil Perusahaan</h2>
+    <h2>Profil Saya</h2>
     <div class="profile-item">
-        <div class="label">Nama Perusahaan:</div>
-        <div class="value"><?= htmlspecialchars($employer['nama_perusahaan']) ?></div>
+        <div class="label">Nama:</div>
+        <div class="value"><?= htmlspecialchars($user['name']) ?></div>
     </div>
     <div class="profile-item">
         <div class="label">Email:</div>
-        <div class="value"><?= htmlspecialchars($employer['email']) ?></div>
-    </div>
-    <div class="profile-item">
-        <div class="label">Nomor Telepon:</div>
-        <div class="value"><?= htmlspecialchars($employer['no_telepon']) ?></div>
-    </div>
-    <div class="profile-item">
-        <div class="label">Alamat:</div>
-        <div class="value"><?= htmlspecialchars($employer['alamat']) ?></div>
+        <div class="value"><?= htmlspecialchars($user['email']) ?></div>
     </div>
     <div class="profile-item">
         <div class="label">Password:</div>
         <div class="value"><?= str_repeat('*', 8) ?></div>
     </div>
-    <a href="dashboard_employer.php" class="back-link">Kembali ke Dashboard</a>
+    <a href="dashboard_user.php" class="back-link">Kembali ke Dashboard</a>
 </div>
 
 <footer class="footer">
