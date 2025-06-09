@@ -1,25 +1,21 @@
 <?php
-// login_employer.php
 session_start();
-require_once 'koneksi.php';
+include 'koneksi.php';
 
-// Check if employer is already logged in
 if(isset($_SESSION['employer_id'])) {
-    header("Location: employer_dashboard.php");
+    $redirect = $_GET['redirect'] ?? 'dashboard_employer.php';
+    header("Location: $redirect");
     exit;
 }
 
-// Handle login form submission
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    // Validasi
     if(empty($email) || empty($password)) {
         $error = "Email dan password harus diisi";
     } else {
-        // Cek employer di database
-        $stmt = $conn->prepare("SELECT id, company_name, email, password FROM employers WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, nama_perusahaan, email, password FROM employers WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -27,14 +23,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         if($result->num_rows === 1) {
             $employer = $result->fetch_assoc();
             
-            // Verifikasi password
             if(password_verify($password, $employer['password'])) {
-                // Login sukses
                 $_SESSION['employer_id'] = $employer['id'];
-                $_SESSION['employer_name'] = $employer['company_name'];
+                $_SESSION['employer_name'] = $employer['nama_perusahaan'];
                 $_SESSION['employer_email'] = $employer['email'];
                 
-                header("Location: employer_dashboard.php");
+                $redirect = $_GET['redirect'] ?? 'dashboard_employer.php';
+                header("Location: $redirect");
                 exit;
             } else {
                 $error = "Email atau password salah";
@@ -42,9 +37,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $error = "Email atau password salah";
         }
+        
         $stmt->close();
     }
 }
+
+$redirect = $_GET['redirect'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -53,11 +51,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Employer - Job Portal Indonesia</title>
-    <link rel="stylesheet" href="styles/logreg_employer.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
-
-        .register-wrapper {
+        .login-wrapper {
             max-width: 550px;
             margin: 80px auto 0;
         }
@@ -81,7 +78,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-decoration: underline;
         }
 
-        .register-container {
+        .login-container {
             padding: 40px;
             background: white;
             border-radius: 12px;
@@ -89,7 +86,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             width: 100%;
         }
         
-        .register-title {
+        .login-title {
             color: #001f54;
             text-align: center;
             margin-bottom: 30px;
@@ -107,9 +104,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #333;
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -118,20 +113,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             transition: border 0.3s;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             border-color: #001f54;
             outline: none;
         }
         
-        .error-message {
-            color: #ff007f;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .register-button {
+        .login-button {
             width: 100%;
             padding: 14px;
             background-color: #001f54;
@@ -144,24 +131,31 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             transition: background 0.3s;
         }
         
-        .register-button:hover {
+        .login-button:hover {
             background-color: #000e27;
         }
         
-        .register-footer {
+        .login-footer {
             text-align: center;
             margin-top: 20px;
             color: #666;
         }
         
-        .register-footer a {
+        .login-footer a {
             color: #001f54;
             text-decoration: none;
             font-weight: bold;
         }
         
-        .register-footer a:hover {
+        .login-footer a:hover {
             text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #ff007f;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
 
         /* NAVBAR */
@@ -245,7 +239,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 margin-bottom: 20px;
             }
             
-            .register-wrapper {
+            .login-wrapper {
                 margin-top: 40px;
                 max-width: 90%;
             }
@@ -305,7 +299,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 14px;
             opacity: 0.7;
         }
-
     </style>
 </head>
 <body>
@@ -327,22 +320,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     </nav>
 </div>
 
-<!-- Login Form for Employers -->
-<div class="register-wrapper">
+<!-- Login Form with Jobseeker Link -->
+<div class="login-wrapper">
     <div class="jobseeker-link-container">
-        <a href="login-user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
+        <a href="login_user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
     </div>
     
-    <div class="register-container">
-        <h1 class="register-title">Masuk Sebagai Employer</h1>
+    <div class="login-container">
+        <h1 class="login-title">Masuk Sebagai Employer</h1>
         
         <?php if(isset($error)): ?>
-            <div class="error-message" style="text-align: center; margin-bottom: 20px;">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <div class="error-message"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         
-        <form method="POST" action="login_employer.php">
+        <form method="POST" action="login_employer.php<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>">
             <div class="form-group">
                 <label for="email">Email Perusahaan</label>
                 <input type="email" id="email" name="email" required placeholder="contoh@perusahaan.com">
@@ -353,10 +344,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="password" id="password" name="password" required placeholder="Masukkan password">
             </div>
             
-            <button type="submit" class="register-button">MASUK</button>
+            <button type="submit" class="login-button">MASUK</button>
         </form>
         
-        <div class="register-footer">
+        <div class="login-footer">
             Belum punya akun employer? <a href="register_employer.php">Daftar disini</a><br>
             <a href="forgot-password.php">Lupa password?</a>
         </div>

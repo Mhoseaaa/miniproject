@@ -550,7 +550,7 @@ button[type="submit"]:hover {
   <div class="job-list">
     <?php if ($result && $result->num_rows > 0): ?>
       <?php while($row = $result->fetch_assoc()): ?>
-        <div class="job-card" data-slug="<?= htmlspecialchars($row['slug']) ?>">
+        <div class="job-card" data-id="<?= htmlspecialchars($row['id']) ?>">
           <!-- Menu titik tiga -->
           <div class="menu-container">
             <button class="menu-button">⋮</button>
@@ -574,7 +574,7 @@ button[type="submit"]:hover {
               <?= htmlspecialchars($row['lokasi']) ?>
           </div>
           <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              <?= htmlspecialchars($row['gaji']) ?>
+              Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?>
           </div>
         </div>
       <?php endwhile; ?>
@@ -605,8 +605,8 @@ jobCards.forEach(card => {
     // Cegah klik di menu titik tiga
     if (e.target.closest('.menu-container')) return;
 
-    const slug = card.getAttribute('data-slug');
-    fetch(`detail_ajax.php?slug=${slug}`)
+    const id = card.getAttribute('data-id'); // Ganti ke data-id
+    fetch(`detail_ajax.php?id=${id}`)       // Ganti parameter ke id
       .then(res => res.text())
       .then(html => {
         jobDetail.innerHTML = html;
@@ -614,6 +614,7 @@ jobCards.forEach(card => {
   });
 });
 </script>
+
 
 
 </div>

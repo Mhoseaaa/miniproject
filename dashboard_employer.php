@@ -1,23 +1,63 @@
 <?php
-// Koneksi ke database
+session_start();
+
+if (!isset($_SESSION['employer_id'])) {
+    header("Location: login_employer.php");
+    exit;
+}
+
 include 'koneksi.php';
 
-$keyword  = $_GET['keyword'] ?? '';
-$kategori = $_GET['kategori'] ?? '';
-$lokasi   = $_GET['lokasi'] ?? '';
+$employerId = $_SESSION['employer_id'];
 
-$sql = "SELECT * FROM lowongan WHERE 1=1";
+// Initialize search variables
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+$lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : '';
+$kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+
+// Ambil data employer dari database
+$stmt = $conn->prepare("SELECT id, nama_perusahaan, email FROM employers WHERE id = ?");
+$stmt->bind_param("i", $employerId);
+$stmt->execute();
+$resultEmployer = $stmt->get_result();
+$employer = $resultEmployer->fetch_assoc();
+
+if (!$employer) {
+    session_destroy();
+    header("Location: login_employer.php");
+    exit;
+}
+
+// Ambil lowongan yang dibuat oleh employer ini dengan filter pencarian
+$sql = "SELECT * FROM lowongan WHERE employer_id = ?";
+$params = [$employerId];
+$types = "i";
+
 if (!empty($keyword)) {
-    $sql .= " AND (judul LIKE '%" . $conn->real_escape_string($keyword) . "%' OR perusahaan LIKE '%" . $conn->real_escape_string($keyword) . "%')";
+    $sql .= " AND (judul LIKE ? OR perusahaan LIKE ?)";
+    $params[] = "%$keyword%";
+    $params[] = "%$keyword%";
+    $types .= "ss";
 }
+
 if (!empty($kategori)) {
-    $sql .= " AND kategori = '" . $conn->real_escape_string($kategori) . "'";
+    $sql .= " AND kategori = ?";
+    $params[] = $kategori;
+    $types .= "s";
 }
+
 if (!empty($lokasi)) {
-    $sql .= " AND lokasi LIKE '%" . $conn->real_escape_string($lokasi) . "%'";
+    $sql .= " AND lokasi LIKE ?";
+    $params[] = "%$lokasi%";
+    $types .= "s";
 }
+
 $sql .= " ORDER BY id DESC";
-$result = $conn->query($sql);
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param($types, ...$params);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -28,8 +68,7 @@ $result = $conn->query($sql);
 <title>Job Portal Indonesia</title>
 <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
 <style>
-
-    /* GLOBAL STYLING */
+  /* GLOBAL STYLING */
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -118,43 +157,6 @@ main {
     color: white;
 }
 
-/* BREADCRUMB */
-.breadcrumb {
-    display: flex;
-    align-items: center;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 16px;
-}
-
-.breadcrumb li {
-    display: flex;
-    align-items: center;
-    color: #555;
-}
-
-.breadcrumb li a {
-    text-decoration: none;
-    color: #001f54;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-
-.breadcrumb li a:hover {
-    color: #000b1d;
-}
-
-.breadcrumb li span {
-    margin: 0 8px;
-    color: #999;
-}
-
-.breadcrumb .active {
-    font-weight: bold;
-    color: #000;
-}
-
 /* LAYOUT */
 .container {
     width: 80%;
@@ -215,11 +217,10 @@ main {
   border-radius: 50%;
   background-color: #ffeaf5;
   padding: 4px;
-
   margin-left: 90%;
 }
 
-/* JOB CARD - HOVER ONLY VERSION */
+/* JOB CARD */
 .job-card {
     cursor: pointer;
     position: relative;
@@ -232,19 +233,12 @@ main {
     border-radius: 20px;
     width: 500px;
     height: 260px;
-    
-    /* Border standar */
     border: 2px solid #e0e0e0;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    
-    /* Transisi hanya untuk border dan shadow */
-    transition: 
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .job-card:hover {
-    /* Hanya ubah warna border dan shadow */
     border-color: #001f54;
     box-shadow: 0 2.5px 14px rgba(0, 31, 84, 0.12);
 }
@@ -255,56 +249,10 @@ main {
     margin: 7px 0;
 }
 
-.corp {
-    font-size: 14px;
-    font-weight: bold;
-    color: #555;
-    margin-top: -5px !important;
-}
-
 .job-card img {
     width: 80px;
     height: 80px;
     border-radius: 10px;
-}
-
-.job-logo-container {
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-}
-
-.job-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-}
-
-.job-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.job-card h5 {
-    margin: 10px 0;
-}
-
-.job-card a {
-    margin-top: 10px;
-    text-align: center;
-    display: block;
-    padding: 10px;
-    background-color: #001f54;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    transition: background-color 0.3s ease-in-out;
-}
-
-.job-card a:hover {
-    background-color: #000e27;
 }
 
 /* MENU DROPDOWN */
@@ -429,10 +377,6 @@ button[type="submit"]:hover {
     background-color: #e60073;
 }
 
-.mt {
-    margin-right: 70px;
-}
-
 /* FOOTER */
 .footer {
     background-color: #001f54;
@@ -488,6 +432,30 @@ button[type="submit"]:hover {
     opacity: 0.7;
 }
 
+/* ADD JOB BUTTON */
+.add-job-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #001f54;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.add-job-button:hover {
+    background-color: #000b1d;
+    transform: scale(1.1);
+}
 </style>
 </head>
 <body>
@@ -495,14 +463,15 @@ button[type="submit"]:hover {
 <!-- Navbar -->
 <div class="navbar-container">
     <nav class="navbar">
-        <a href="index.php" class="logo">
+        <a href="dashboard_employer.php" class="logo">
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="profile_employer.php"><button class="outline-button">Profile</button></a>
-            <ul class="breadcrumb">
-                <li><a href="index.php" class="nav-item active">Beranda</a></li>
-            </ul>
+            <span>Halo, <?= htmlspecialchars($employer['nama_perusahaan']) ?></span> |
+            <a href="dashboard_employer.php" class="nav-item">Beranda</a> |
+            <a href="profile_employer.php" class="nav-item">Profil</a> |
+            <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a> |
+            <a href="logout.php" class="nav-item">Logout</a>
         </div>
     </nav>
 </div>
@@ -515,9 +484,8 @@ button[type="submit"]:hover {
         <input type="text" name="keyword" placeholder="Masukkan kata kunci" value="<?= htmlspecialchars($keyword) ?>">
       </div>
       <div class="search-field">
-
-      <label for="kategori">Klasifikasi</label>
-          <select name="kategori">
+        <label for="kategori">Klasifikasi</label>
+        <select name="kategori">
           <option value="">Semua Klasifikasi</option>
           <option value="IT" <?= $kategori === 'IT' ? 'selected' : '' ?>>IT</option>
           <option value="Desain" <?= $kategori === 'Desain' ? 'selected' : '' ?>>Desain</option>
@@ -532,9 +500,7 @@ button[type="submit"]:hover {
           <option value="Transportasi" <?= $kategori === 'Transportasi' ? 'selected' : '' ?>>Transportasi</option>
           <option value="Administrasi" <?= $kategori === 'Administrasi' ? 'selected' : '' ?>>Administrasi</option>
           <option value="Hukum" <?= $kategori === 'Hukum' ? 'selected' : '' ?>>Hukum</option>
-          </select>
-          <!-- Tambahkan kategori lainnya -->
-
+        </select>
       </div>
       <div class="search-field">
         <label for="lokasi">Daerah</label>
@@ -549,13 +515,13 @@ button[type="submit"]:hover {
   <div class="job-list">
     <?php if ($result && $result->num_rows > 0): ?>
       <?php while($row = $result->fetch_assoc()): ?>
-        <div class="job-card" data-slug="<?= htmlspecialchars($row['slug']) ?>">
+        <div class="job-card" data-id="<?= htmlspecialchars($row['id']) ?>">
           <!-- Menu titik tiga -->
           <div class="menu-container">
             <button class="menu-button">⋮</button>
             <ul class="dropdown-menu">
-              <li><a href="#">Simpan</a></li>
-              <li><a href="#">Tidak Tertarik</a></li>
+              <li><a href="edit_job.php?id=<?= $row['id'] ?>">Edit</a></li>
+              <li><a href="delete_job.php?id=<?= $row['id'] ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus lowongan ini?')">Hapus</a></li>
             </ul>
           </div>
 
@@ -573,7 +539,7 @@ button[type="submit"]:hover {
               <?= htmlspecialchars($row['lokasi']) ?>
           </div>
           <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              <?= htmlspecialchars($row['gaji']) ?>
+              Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?>
           </div>
         </div>
       <?php endwhile; ?>
@@ -582,17 +548,17 @@ button[type="submit"]:hover {
     <?php endif; ?>
   </div>
 
-
-<div class="job-details" id="job-detail">
-  <div class="job-placeholder">
-    <h2><= Pilih lowongan kerja</h2>
-    <p>Tampilkan detail di sini</p>
-    <img src="assets/background/lihat.png" alt="Logo Web" />
+  <div class="job-details" id="job-detail">
+    <div class="job-placeholder">
+      <h2><= Pilih lowongan kerja</h2>
+      <p>Tampilkan detail di sini</p>
+      <img src="assets/background/lihat.png" alt="Logo Web" />
+    </div>
   </div>
 </div>
 
-
-
+<!-- Floating Add Job Button -->
+<a href="add_job.php" class="add-job-button">+</a>
 
 <script>
 // Klik job-card buat load detail
@@ -604,8 +570,8 @@ jobCards.forEach(card => {
     // Cegah klik di menu titik tiga
     if (e.target.closest('.menu-container')) return;
 
-    const slug = card.getAttribute('data-slug');
-    fetch(`detail_employer.php?slug=${slug}`)
+    const id = card.getAttribute('data-id');
+    fetch(`detail_employer.php?id=${id}`)
       .then(res => res.text())
       .then(html => {
         jobDetail.innerHTML = html;
@@ -613,9 +579,6 @@ jobCards.forEach(card => {
   });
 });
 </script>
-
-
-</div>
 
 <footer class="footer">
     <div class="footer-container">

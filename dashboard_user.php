@@ -1,24 +1,55 @@
 <?php
-// Koneksi ke database
+session_start();
+
+if (!isset($_SESSION['user_email'])) {
+    header("Location: login_user.php");
+    exit;
+}
+
 include 'koneksi.php';
 
+$userEmail = $_SESSION['user_email'];
+
+// Ambil data user dari database
+$stmt = $conn->prepare("SELECT name, email FROM users WHERE email = ?");
+$stmt->bind_param("s", $userEmail);
+$stmt->execute();
+$resultUser = $stmt->get_result();
+$user = $resultUser->fetch_assoc();
+
+if (!$user) {
+    session_destroy();
+    header("Location: login_user.php");
+    exit;
+}
+
+// Ambil parameter filter
 $keyword  = $_GET['keyword'] ?? '';
 $kategori = $_GET['kategori'] ?? '';
 $lokasi   = $_GET['lokasi'] ?? '';
 
 $sql = "SELECT * FROM lowongan WHERE 1=1";
 if (!empty($keyword)) {
-    $sql .= " AND (judul LIKE '%" . $conn->real_escape_string($keyword) . "%' OR perusahaan LIKE '%" . $conn->real_escape_string($keyword) . "%')";
+    $keywordEsc = $conn->real_escape_string($keyword);
+    $sql .= " AND (judul LIKE '%$keywordEsc%' OR perusahaan LIKE '%$keywordEsc%')";
 }
 if (!empty($kategori)) {
-    $sql .= " AND kategori = '" . $conn->real_escape_string($kategori) . "'";
+    $kategoriEsc = $conn->real_escape_string($kategori);
+    $sql .= " AND kategori = '$kategoriEsc'";
 }
 if (!empty($lokasi)) {
-    $sql .= " AND lokasi LIKE '%" . $conn->real_escape_string($lokasi) . "%'";
+    $lokasiEsc = $conn->real_escape_string($lokasi);
+    $sql .= " AND lokasi LIKE '%$lokasiEsc%'";
 }
 $sql .= " ORDER BY id DESC";
+
 $result = $conn->query($sql);
+if (!$result) {
+    die("Query error: " . $conn->error);
+}
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -29,7 +60,7 @@ $result = $conn->query($sql);
 <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
 <style>
 
-    /* GLOBAL STYLING */
+  /* GLOBAL STYLING */
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -496,14 +527,13 @@ button[type="submit"]:hover {
 <!-- Navbar -->
 <div class="navbar-container">
     <nav class="navbar">
-        <a href="index.php" class="logo">
+        <a href="dashboard_user.php" class="logo">
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="login2.php"><button class="outline-button">Masuk</button></a>
-            <ul class="breadcrumb">
-                <li><a href="index.php" class="nav-item active">Beranda</a></li>
-            </ul>
+            <span>Halo, <?= htmlspecialchars($user['name']) ?></span> |
+            <a href="profile_user.php" class="nav-item">Profil</a> |
+            <a href="logout.php" class="nav-item">Logout</a>
         </div>
     </nav>
 </div>
@@ -550,7 +580,7 @@ button[type="submit"]:hover {
   <div class="job-list">
     <?php if ($result && $result->num_rows > 0): ?>
       <?php while($row = $result->fetch_assoc()): ?>
-        <div class="job-card" data-slug="<?= htmlspecialchars($row['slug']) ?>">
+        <div class="job-card" data-id="<?= htmlspecialchars($row['id']) ?>">
           <!-- Menu titik tiga -->
           <div class="menu-container">
             <button class="menu-button">⋮</button>
@@ -574,7 +604,7 @@ button[type="submit"]:hover {
               <?= htmlspecialchars($row['lokasi']) ?>
           </div>
           <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              <?= htmlspecialchars($row['gaji']) ?>
+              Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?>
           </div>
         </div>
       <?php endwhile; ?>
@@ -605,8 +635,8 @@ jobCards.forEach(card => {
     // Cegah klik di menu titik tiga
     if (e.target.closest('.menu-container')) return;
 
-    const slug = card.getAttribute('data-slug');
-    fetch(`detail_ajax.php?slug=${slug}`)
+    const id = card.getAttribute('data-id'); // Ganti ke data-id
+    fetch(`detail_ajax.php?id=${id}`)       // Ganti parameter ke id
       .then(res => res.text())
       .then(html => {
         jobDetail.innerHTML = html;
@@ -614,6 +644,7 @@ jobCards.forEach(card => {
   });
 });
 </script>
+
 
 
 </div>

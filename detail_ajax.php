@@ -3,14 +3,14 @@
 session_start();
 include 'koneksi.php';
 
-$slug = $_GET['slug'] ?? '';
-if (empty($slug)) {
+$id = $_GET['id'] ?? '';
+if (empty($id) || !is_numeric($id)) {
     echo "Data tidak ditemukan.";
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM lowongan WHERE slug = ? LIMIT 1");
-$stmt->bind_param("s", $slug);
+$stmt = $conn->prepare("SELECT * FROM lowongan WHERE id = ? LIMIT 1");
+$stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -33,11 +33,11 @@ if ($row = $result->fetch_assoc()) {
         <h3>Kualifikasi Pekerjaan</h3>
         <p><?= nl2br(htmlspecialchars($row['kualifikasi'])) ?></p>
         <h3>Gaji</h3>
-        <p><?= htmlspecialchars($row['gaji']) ?></p>
+        <p>Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?></p>
         <?php if(isset($_SESSION['user_id'])): ?>
-            <a href="lamar.php?slug=<?= $slug ?>" class="apply-button">Lamar Sekarang</a>
+            <a href="lamar.php?id=<?= $id ?>" class="apply-button">Lamar Sekarang</a>
         <?php else: ?>
-            <a href="login_user.php?redirect=dashboard_user.php?slug=<?= $slug ?>" class="apply-button">Login untuk Melamar</a>
+            <a href="login_user.php?redirect=dashboard_user.php?id=<?= $id ?>" class="apply-button">Login untuk Melamar</a>
         <?php endif; ?>
     </div>
 </div>

@@ -1,97 +1,89 @@
 <?php
-// register_employer.php
 session_start();
-require_once 'koneksi.php';
+include 'koneksi.php';
 
-// Check if employer is already logged in
-if(isset($_SESSION['employer_id'])) {
-    header("Location: employer_dashboard.php");
+$errors = [];
+
+if (isset($_SESSION['employer_id'])) {
+    header("Location: index.php");
     exit;
 }
 
-// Handle registration form submission
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $company_name = trim($_POST['company_name'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $nama_perusahaan = trim($_POST['nama_perusahaan'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    $phone = trim($_POST['phone'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $industry = trim($_POST['industry'] ?? '');
-    
+    $no_telepon = trim($_POST['no_telepon'] ?? '');
+    $alamat = trim($_POST['alamat'] ?? '');
+
     // Validasi
-    $errors = [];
-    
-    if(empty($company_name)) {
-        $errors['company_name'] = "Nama perusahaan harus diisi";
+    if (empty($nama_perusahaan)) {
+        $errors['nama_perusahaan'] = "Nama perusahaan harus diisi";
     }
-    
-    if(empty($email)) {
+
+    if (empty($email)) {
         $errors['email'] = "Email harus diisi";
-    } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Format email tidak valid";
-    } else {
-        // Cek apakah email sudah terdaftar
+    }
+
+    if (empty($password)) {
+        $errors['password'] = "Password harus diisi";
+    } elseif (strlen($password) < 6) {
+        $errors['password'] = "Password minimal 6 karakter";
+    }
+
+    if ($password !== $confirm_password) {
+        $errors['confirm_password'] = "Password tidak cocok";
+    }
+
+    if (empty($no_telepon)) {
+        $errors['no_telepon'] = "Nomor telepon harus diisi";
+    }
+
+    if (empty($alamat)) {
+        $errors['alamat'] = "Alamat harus diisi";
+    }
+
+    // Cek apakah email sudah digunakan
+    if (empty($errors)) {
         $stmt = $conn->prepare("SELECT id FROM employers WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $stmt->store_result();
+        if ($stmt === false) {
+            die("Error preparing statement: " . $conn->error);
+        }
         
-        if($stmt->num_rows > 0) {
-            $errors['email'] = "Email ini sudah terdaftar";
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            die("Error executing statement: " . $stmt->error);
+        }
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $errors['email'] = "Email sudah terdaftar";
         }
         $stmt->close();
     }
-    
-    if(empty($password)) {
-        $errors['password'] = "Password harus diisi";
-    } elseif(strlen($password) < 6) {
-        $errors['password'] = "Password minimal 6 karakter";
-    }
-    
-    if($password !== $confirm_password) {
-        $errors['confirm_password'] = "Password tidak cocok";
-    }
-    
-    if(empty($phone)) {
-        $errors['phone'] = "Nomor telepon harus diisi";
-    }
-    
-    // Jika tidak ada error, proses registrasi
-    if(empty($errors)) {
-        // Hash password
+
+    // Simpan ke database
+    if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("INSERT INTO employers (nama_perusahaan, email, password, no_telepon, alamat) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt === false) {
+            die("Error preparing statement: " . $conn->error);
+        }
         
-        // Simpan ke database
-        $stmt = $conn->prepare("INSERT INTO employers (company_name, email, password, phone, address, industry) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $company_name, $email, $hashed_password, $phone, $address, $industry);
-        
-        if($stmt->execute()) {
-            // Registrasi berhasil
+        $stmt->bind_param("sssss", $nama_perusahaan, $email, $hashed_password, $no_telepon, $alamat);
+
+        if ($stmt->execute()) {
             $_SESSION['registration_success'] = true;
             header("Location: login_employer.php");
             exit;
         } else {
-            $errors['database'] = "Terjadi kesalahan. Silakan coba lagi.";
+            $errors['general'] = "Gagal mendaftar. Error: " . $stmt->error;
         }
         $stmt->close();
     }
-}
-
-// Update koneksi.php untuk membuat tabel employers jika belum ada
-$sql = "CREATE TABLE IF NOT EXISTS employers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    company_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    address TEXT,
-    industry VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-
-if (!$conn->query($sql)) {
-    die("Error creating employers table: " . $conn->error);
 }
 ?>
 
@@ -101,7 +93,7 @@ if (!$conn->query($sql)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Employer - Job Portal Indonesia</title>
-    <link rel="stylesheet" href="styles/logreg_employer.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
         .register-wrapper {
@@ -154,9 +146,7 @@ if (!$conn->query($sql)) {
             color: #333;
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -165,9 +155,7 @@ if (!$conn->query($sql)) {
             transition: border 0.3s;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             border-color: #001f54;
             outline: none;
         }
@@ -373,35 +361,29 @@ if (!$conn->query($sql)) {
     </nav>
 </div>
 
-<!-- Registration Form for Employers -->
+<!-- Registration Form with Jobseeker Link -->
 <div class="register-wrapper">
     <div class="jobseeker-link-container">
-        <a href="register.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
+        <a href="register_user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
     </div>
     
     <div class="register-container">
         <h1 class="register-title">Daftar Sebagai Employer</h1>
         
-        <?php if(isset($errors['database'])): ?>
-            <div class="error-message" style="text-align: center; margin-bottom: 20px;">
-                <?= htmlspecialchars($errors['database']) ?>
-            </div>
-        <?php endif; ?>
-        
         <form method="POST" action="register_employer.php">
             <div class="form-group">
-                <label for="company_name">Nama Perusahaan</label>
-                <input type="text" id="company_name" name="company_name" required 
-                       placeholder="Masukkan nama perusahaan" value="<?= htmlspecialchars($_POST['company_name'] ?? '') ?>">
-                <?php if(isset($errors['company_name'])): ?>
-                    <div class="error-message"><?= $errors['company_name'] ?></div>
+                <label for="nama_perusahaan">Nama Perusahaan</label>
+                <input type="text" id="nama_perusahaan" name="nama_perusahaan" required placeholder="Masukkan nama perusahaan"
+                       value="<?= htmlspecialchars($_POST['nama_perusahaan'] ?? '') ?>">
+                <?php if(isset($errors['nama_perusahaan'])): ?>
+                    <div class="error-message"><?= $errors['nama_perusahaan'] ?></div>
                 <?php endif; ?>
             </div>
             
             <div class="form-group">
-                <label for="email">Email Perusahaan</label>
-                <input type="email" id="email" name="email" required 
-                       placeholder="contoh@perusahaan.com" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                <label for="email">Alamat Email</label>
+                <input type="email" id="email" name="email" required placeholder="contoh@email.com"
+                       value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                 <?php if(isset($errors['email'])): ?>
                     <div class="error-message"><?= $errors['email'] ?></div>
                 <?php endif; ?>
@@ -409,56 +391,43 @@ if (!$conn->query($sql)) {
             
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required 
-                       placeholder="Masukkan password (minimal 6 karakter)">
+                <input type="password" id="password" name="password" required placeholder="Masukkan password (minimal 6 karakter)">
                 <?php if(isset($errors['password'])): ?>
                     <div class="error-message"><?= $errors['password'] ?></div>
                 <?php endif; ?>
             </div>
-            
+
             <div class="form-group">
                 <label for="confirm_password">Konfirmasi Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" required 
-                       placeholder="Masukkan ulang password">
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Ulangi password">
                 <?php if(isset($errors['confirm_password'])): ?>
                     <div class="error-message"><?= $errors['confirm_password'] ?></div>
                 <?php endif; ?>
             </div>
             
             <div class="form-group">
-                <label for="phone">Nomor Telepon</label>
-                <input type="tel" id="phone" name="phone" required 
-                       placeholder="Masukkan nomor telepon" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
-                <?php if(isset($errors['phone'])): ?>
-                    <div class="error-message"><?= $errors['phone'] ?></div>
+                <label for="no_telepon">Nomor Telepon</label>
+                <input type="text" id="no_telepon" name="no_telepon" required placeholder="Masukkan nomor telepon"
+                       value="<?= htmlspecialchars($_POST['no_telepon'] ?? '') ?>">
+                <?php if(isset($errors['no_telepon'])): ?>
+                    <div class="error-message"><?= $errors['no_telepon'] ?></div>
                 <?php endif; ?>
             </div>
             
             <div class="form-group">
-                <label for="industry">Industri</label>
-                <select id="industry" name="industry">
-                    <option value="">Pilih industri</option>
-                    <option value="IT" <?= ($_POST['industry'] ?? '') === 'IT' ? 'selected' : '' ?>>IT</option>
-                    <option value="Keuangan" <?= ($_POST['industry'] ?? '') === 'Keuangan' ? 'selected' : '' ?>>Keuangan</option>
-                    <option value="Manufaktur" <?= ($_POST['industry'] ?? '') === 'Manufaktur' ? 'selected' : '' ?>>Manufaktur</option>
-                    <option value="Pendidikan" <?= ($_POST['industry'] ?? '') === 'Pendidikan' ? 'selected' : '' ?>>Pendidikan</option>
-                    <option value="Kesehatan" <?= ($_POST['industry'] ?? '') === 'Kesehatan' ? 'selected' : '' ?>>Kesehatan</option>
-                    <option value="Retail" <?= ($_POST['industry'] ?? '') === 'Retail' ? 'selected' : '' ?>>Retail</option>
-                    <option value="Lainnya" <?= ($_POST['industry'] ?? '') === 'Lainnya' ? 'selected' : '' ?>>Lainnya</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="address">Alamat Perusahaan</label>
-                <textarea id="address" name="address" rows="3" 
-                          placeholder="Masukkan alamat perusahaan"><?= htmlspecialchars($_POST['address'] ?? '') ?></textarea>
+                <label for="alamat">Alamat Perusahaan</label>
+                <input type="text" id="alamat" name="alamat" required placeholder="Masukkan alamat perusahaan"
+                       value="<?= htmlspecialchars($_POST['alamat'] ?? '') ?>">
+                <?php if(isset($errors['alamat'])): ?>
+                    <div class="error-message"><?= $errors['alamat'] ?></div>
+                <?php endif; ?>
             </div>
             
             <button type="submit" class="register-button">DAFTAR SEKARANG</button>
         </form>
         
         <div class="register-footer">
-            Sudah punya akun employer? <a href="login_employer.php">Masuk disini</a>
+            Sudah punya akun? <a href="login_employer.php">Masuk disini</a>
         </div>
     </div>
 </div>
