@@ -271,7 +271,7 @@ $applications = mysqli_fetch_all($result_applications, MYSQLI_ASSOC);
                 <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
             </a>
             <div class="nav-right">
-                <a href="employer/dashboard_employer.php" class="nav-item active">Dashboard</a>
+                <a href="dashboard_employer.php" class="nav-item active">Dashboard</a>
                 <a href="lowongan_employer.php" class="nav-item">Daftar Lowongan</a>
                 <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a>
                 <a href="lamaran_employer.php" class="nav-item">Lamaran Diterima</a>

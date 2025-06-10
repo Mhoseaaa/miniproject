@@ -28,75 +28,9 @@ if (!$user) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="navbar.css">
 <title>Profil Saya</title>
 <style>
-  /* GLOBAL STYLING */
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    padding-top: 60px;
-  }
-
-  /* NAVBAR */
-  .navbar-container {
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-
-  .navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px 15px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .nav-item {
-    position: relative;
-    font-size: 16px;
-    font-weight: bold;
-    text-decoration: none;
-    color: black;
-    padding-bottom: 5px;
-  }
-
-  .nav-item::after {
-    content: "";
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: #001f54;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    transform: scaleX(0);
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .nav-item.active::after,
-  .nav-item:hover::after {
-    transform: scaleX(1);
-  }
-
-  .logo img {
-    width: 150px !important;
-    height: auto;
-  }
-
   /* PROFILE CONTENT */
   .profile-container {
     max-width: 500px;
@@ -202,15 +136,16 @@ if (!$user) {
 </head>
 <body>
 
-<!-- Navbar -->
 <div class="navbar-container">
     <nav class="navbar">
         <a href="dashboard_user.php" class="logo">
-            <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
+            <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
         </a>
         <div class="nav-right">
-            <span>Halo, <?= htmlspecialchars($user['name']) ?></span> |
-            <a href="profile_user.php" class="nav-item">Profil</a> |
+            <a href="dashboard_user.php" class="nav-item">Dashboard</a>
+            <a href="lowongan_user.php" class="nav-item">Daftar Lowongan</a>
+            <a href="lamaran_user.php" class="nav-item">Lamaran Saya</a>
+            <a href="profile_user.php" class="nav-item active">Profil</a>
             <a href="logout.php" class="nav-item">Logout</a>
         </div>
     </nav>
