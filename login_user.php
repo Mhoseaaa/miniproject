@@ -51,111 +51,20 @@ $redirect = $_GET['redirect'] ?? '';
     <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
-        .login-wrapper {
-            max-width: 550px;
-            margin: 80px auto 0;
+        /* Layout: sticky footer */
+        html, body {
+            height: 100%;
+            margin: 0;
         }
-        
-        .jobseeker-link-container {
-            text-align: right;
-            margin-bottom: 10px;
+        body {
+            display: flex;
+            flex-direction: column;
         }
-        
-        .jobseeker-link {
-            color: #001f54;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-right:-50px;
+        main.main-content {
+            flex: 1;
+            padding-top: 80px; /* account for navbar height */
         }
-
-        .jobseeker-link:hover {
-            text-decoration: underline;
-        }
-
-        .login-container {
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-        
-        .login-title {
-            color: #001f54;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: #001f54;
-            outline: none;
-        }
-        
-        .login-button {
-            width: 100%;
-            padding: 14px;
-            background-color: #001f54;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .login-button:hover {
-            background-color: #000e27;
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-        
-        .login-footer a {
-            color: #001f54;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #ff007f;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        /* NAVBAR */
+        /* Navbar fixed on top */
         .navbar-container {
             width: 100%;
             position: fixed;
@@ -165,7 +74,6 @@ $redirect = $_GET['redirect'] ?? '';
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
         .navbar {
             display: flex;
             align-items: center;
@@ -174,128 +82,56 @@ $redirect = $_GET['redirect'] ?? '';
             max-width: 1200px;
             margin: 0 auto;
         }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .nav-item {
-            position: relative;
-            font-size: 16px;
-            font-weight: bold;
-            text-decoration: none;
-            color: black;
-            padding-bottom: 5px;
-        }
-
-        .nav-item::after {
-            content: "";
-            display: block;
-            width: 100%;
-            height: 2px;
-            background-color: #001f54;
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            transform: scaleX(0);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .nav-item.active::after,
-        .nav-item:hover::after {
-            transform: scaleX(1);
-        }
-
-        .logo img {
-            width: 150px !important;
-            height: auto;
-        }
-
+        .logo img { width: 150px; height: auto; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
         .outline-button {
             background: white;
             color: #001f54;
             border: 2px solid #001f54;
             padding: 8px 16px;
-            font-size: 16px;
             border-radius: 5px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        .outline-button:hover {
-            background: #001f54;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .jobseeker-link-container {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            
-            .login-wrapper {
-                margin-top: 40px;
-                max-width: 90%;
-            }
-        }
-
-        /* FOOTER */
-        .footer {
-            background-color: #001f54;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .footer-container {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: auto;
-            text-align: left;
-        }
-
-        .footer-section {
-            flex: 1;
-            min-width: 250px;
-            margin: 10px;
-        }
-
-        .footer-section h3,
-        .footer-section h4 {
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .footer-section ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-section ul li {
-            margin: 5px 0;
-        }
-
-        .footer-section ul li a {
-            color: white;
             text-decoration: none;
-            transition: color 0.3s;
         }
-
-        .footer-section ul li a:hover {
-            color: #ff007f;
+        .outline-button:hover { background: #001f54; color: white; }
+        .breadcrumb { list-style: none; display: flex; gap: 5px; margin: 0; }
+        .nav-item { position: relative; font-weight: bold; text-decoration: none; color: black; padding-bottom: 5px; }
+        .nav-item::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #001f54; transform: scaleX(0); transition: transform 0.3s; }
+        .nav-item.active::after, .nav-item:hover::after { transform: scaleX(1); }
+        /* Login form */
+        .login-wrapper { max-width: 550px; margin: 0 auto; }
+        .employer-link-container { text-align: right; margin-bottom: 10px; }
+        .employer-link { color: #001f54; font-weight: bold; text-decoration: none; font-size: 16px; transition: 0.3s; }
+        .employer-link:hover { text-decoration: underline; }
+        .login-container {
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
-
-        .footer-copy {
-            margin-top: 20px;
-            font-size: 14px;
-            opacity: 0.7;
-        }
+        .login-title { color: #001f54; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; transition: border 0.3s; }
+        .form-group input:focus { border-color: #001f54; outline: none; }
+        .login-button { width: 100%; padding: 14px; background-color: #001f54; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .login-button:hover { background-color: #000e27; }
+        .login-footer { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+        .login-footer a { color: #001f54; font-weight: bold; text-decoration: none; }
+        .login-footer a:hover { text-decoration: underline; }
+        .error-message { color: #ff007f; text-align: center; margin-bottom: 20px; font-weight: bold; }
+        /* Footer */
+        .footer { background-color: #001f54; color: #fff; padding: 40px 20px; }
+        .footer-container { display: flex; justify-content: space-between; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+        .footer-section { flex: 1; min-width: 200px; margin: 0 10px; }
+        .footer-section h3, .footer-section h4 { font-size: 18px; margin-bottom: 8px; }
+        .footer-section p, .footer-section ul li { font-size: 14px; margin-bottom: 6px; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .footer-section ul li a:hover { color: #ff007f; }
+        .footer-copy { background-color: #000e27; text-align: center; padding: 10px 0; font-size: 13px; opacity: 0.8; margin-top: 20px; }
     </style>
 </head>
 <body>
