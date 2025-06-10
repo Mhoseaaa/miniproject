@@ -33,6 +33,9 @@ $result = $conn->query($sql);
 </head>
 
 <style>
+    body {
+        overflow-x: hidden;
+    }
     /* SEARCH BOX */
     .search-box {
         background-color: #001f54;
@@ -191,7 +194,7 @@ $result = $conn->query($sql);
         <div class="job-list">
             <?php if ($result && $result->num_rows > 0): ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
-                    <div class="job-card" onclick="window.location.href='job_detail.php?id=<?= $row['id'] ?>'">
+                    <div class="job-card" onclick="window.location.href='login_user.php?'">
                         <button class="save-btn" title="Simpan lowongan"><i class="far fa-bookmark"></i></button>
                         <div class="job-card-header">
                             <img src="<?= htmlspecialchars($row['logo'] ?? 'assets/default-logo.png') ?>"

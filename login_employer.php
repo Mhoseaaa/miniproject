@@ -49,123 +49,59 @@ $redirect = $_GET['redirect'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Employer - Job Portal Indonesia</title>
-    <link rel="stylesheet" href="navbar.css">
+    <title>Login Employer - JobSeeker</title>
+    <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
-        .login-wrapper {
-            max-width: 550px;
-            margin: 80px auto 0;
-        }
-        
-        .jobseeker-link-container {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-        
-        .jobseeker-link {
-            color: #001f54;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-right:-50px;
-        }
+        /* Make sticky footer layout */
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; }
+        main.main-content { flex: 1; padding-top: 80px; /* adjust for navbar */ }
 
-        .jobseeker-link:hover {
-            text-decoration: underline;
+        /* Navbar */
+        .navbar-container {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
-
-        .login-container {
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            width: 100%;
+        .navbar {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 5px 15px;
         }
-        
-        .login-title {
-            color: #001f54;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: #001f54;
-            outline: none;
-        }
-        
-        .login-button {
-            width: 100%;
-            padding: 14px;
-            background-color: #001f54;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .login-button:hover {
-            background-color: #000e27;
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-        
-        .login-footer a {
-            color: #001f54;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #ff007f;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
+        .logo img { width: 150px; height: auto; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
         .outline-button {
-            background: white;
-            color: #001f54;
-            border: 2px solid #001f54;
-            padding: 8px 16px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            padding: 8px 16px; border: 2px solid #001f54;
+            background: #fff; color: #001f54; border-radius: 5px;
+            font-weight: bold; cursor: pointer; text-decoration: none;
+            transition: background 0.3s, color 0.3s;
+        }
+        .outline-button:hover { background: #001f54; color: #fff; }
+        .breadcrumb { list-style: none; display: flex; gap: 5px; margin: 0; }
+        .nav-item { position: relative; font-weight: bold; text-decoration: none; color: #000; padding-bottom: 5px; }
+        .nav-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 2px; background: #001f54;
+            transform: scaleX(0); transition: transform 0.3s;
+        }
+        .nav-item.active::after, .nav-item:hover::after { transform: scaleX(1); }
+
+        /* Login form */
+        .login-wrapper { max-width: 550px; margin: 0 auto; }
+        .jobseeker-link-container { text-align: right; margin-bottom: 10px; }
+        .jobseeker-link { color: #001f54; font-weight: bold; text-decoration: none; transition: 0.3s; }
+        .jobseeker-link:hover { text-decoration: underline; }
+        .login-container {
+            background: #fff; padding: 40px;
+            border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .login-title { color: #001f54; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;
+            font-size: 16px; transition: border 0.3s;
         }
         .form-group input:focus { border-color: #001f54; outline: none; }
         .login-button {
@@ -192,16 +128,17 @@ $redirect = $_GET['redirect'] ?? '';
     </style>
 </head>
 <body>
-
-<!-- Navbar -->
+    <!-- Navbar -->
     <div class="navbar-container">
         <nav class="navbar">
-            <a href="employer/dashboard_employer.php" class="logo">
-                <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
-            </a>
+            <a href="index.php" class="logo"><img src="assets/logo website/jobseeker.png" alt="Logo"></a>
             <div class="nav-right">
-                <a href="login_user.php" class="nav-item active">Masuk</a>
-                <a href="register_user.php" class="nav-item">Daftar</a>
+                <a href="register_employer.php" class="outline-button">Daftar</a>
+                <ul class="breadcrumb">
+                    <li><a href="index.php" class="nav-item">Beranda</a></li>
+                    <li><span>/</span></li>
+                    <li><a href="login_employer.php" class="nav-item active">Masuk Employer</a></li>
+                </ul>
             </div>
         </nav>
     </div>
