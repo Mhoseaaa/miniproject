@@ -402,6 +402,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <form action="" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
+                    <label for="logo">Logo Perusahaan</label>
+                    <?php if ($job['logo']): ?>
+                        <img src="<?= htmlspecialchars($job['logo']) ?>" alt="Logo Perusahaan" class="logo-preview">
+                    <?php endif; ?>
+                    <!-- <input type="file" id="logo" name="logo" accept="image/*"> -->
+                </div>
+                
+                <div class="form-group">
                     <label for="judul">Judul Lowongan</label>
                     <input type="text" id="judul" name="judul" value="<?= htmlspecialchars($job['judul']) ?>" required>
                 </div>
@@ -411,13 +419,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="text" id="perusahaan" name="perusahaan" value="<?= htmlspecialchars($job['perusahaan']) ?>" required>
                 </div>
                 
-                <div class="form-group">
-                    <label for="logo">Logo Perusahaan</label>
-                    <?php if ($job['logo']): ?>
-                        <img src="<?= htmlspecialchars($job['logo']) ?>" alt="Logo Perusahaan" class="logo-preview">
-                    <?php endif; ?>
-                    <input type="file" id="logo" name="logo" accept="image/*">
-                </div>
                 
                 <div class="form-group">
                     <label for="lokasi">Lokasi</label>
