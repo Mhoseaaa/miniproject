@@ -9,10 +9,11 @@ if (empty($id) || !is_numeric($id)) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM lowongan WHERE id = ? LIMIT 1");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
+// Casting ke integer untuk keamanan dasar
+$id = (int)$id;
+
+$sql = "SELECT * FROM lowongan WHERE id = $id LIMIT 1";
+$result = $conn->query($sql);
 
 if ($row = $result->fetch_assoc()) {
 ?>
@@ -37,8 +38,8 @@ if ($row = $result->fetch_assoc()) {
 
         <?php if (isset($_SESSION['employer_id'])): ?>
             <div style="margin-top: 20px;">
-                <a href="edit.php?id=<?= $id ?>" style="background-color:gold;color:black;padding:10px 20px;text-decoration:none;border-radius:5px;margin-right:10px;">Edit</a>
-                <a href="hapus.php?id=<?= $id ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus lowongan ini?');" style="background-color:red;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">Hapus</a>
+                <a href="edit_lowongan.php?id=<?= $id ?>" style="background-color:gold;color:black;padding:10px 20px;text-decoration:none;border-radius:5px;margin-right:10px;">Edit</a>
+                <a href="hapus_lowongan.php?id=<?= $id ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus lowongan ini?');" style="background-color:red;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">Hapus</a>
             </div>
         <?php endif; ?>
     </div>
@@ -48,6 +49,5 @@ if ($row = $result->fetch_assoc()) {
     echo "Lowongan tidak ditemukan.";
 }
 
-$stmt->close();
 $conn->close();
 ?>

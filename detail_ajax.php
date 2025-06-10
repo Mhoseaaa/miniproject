@@ -9,10 +9,11 @@ if (empty($id) || !is_numeric($id)) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM lowongan WHERE id = ? LIMIT 1");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
+// Aman secara dasar karena sudah dicek is_numeric, meski bukan cara terbaik
+$id = (int)$id;
+
+$sql = "SELECT * FROM lowongan WHERE id = $id LIMIT 1";
+$result = $conn->query($sql);
 
 if ($row = $result->fetch_assoc()) {
 ?>
@@ -46,6 +47,5 @@ if ($row = $result->fetch_assoc()) {
     echo "Lowongan tidak ditemukan.";
 }
 
-$stmt->close();
 $conn->close();
 ?>

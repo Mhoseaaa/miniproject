@@ -10,17 +10,14 @@ include 'koneksi.php';
 
 $employerId = $_SESSION['employer_id'];
 
-// Initialize search variables
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-$lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : '';
-$kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+// Escape input untuk mencegah SQL injection
+$keyword  = isset($_GET['keyword']) ? mysqli_real_escape_string($conn, $_GET['keyword']) : '';
+$lokasi   = isset($_GET['lokasi']) ? mysqli_real_escape_string($conn, $_GET['lokasi']) : '';
+$kategori = isset($_GET['kategori']) ? mysqli_real_escape_string($conn, $_GET['kategori']) : '';
 
-// Ambil data employer dari database
-$stmt = $conn->prepare("SELECT id, nama_perusahaan, email FROM employers WHERE id = ?");
-$stmt->bind_param("i", $employerId);
-$stmt->execute();
-$resultEmployer = $stmt->get_result();
-$employer = $resultEmployer->fetch_assoc();
+// Ambil data employer
+$resultEmployer = mysqli_query($conn, "SELECT id, nama_perusahaan, email FROM employers WHERE id = $employerId");
+$employer = mysqli_fetch_assoc($resultEmployer);
 
 if (!$employer) {
     session_destroy();
@@ -28,37 +25,28 @@ if (!$employer) {
     exit;
 }
 
-// Ambil lowongan yang dibuat oleh employer ini dengan filter pencarian
-$sql = "SELECT * FROM lowongan WHERE employer_id = ?";
-$params = [$employerId];
-$types = "i";
+// Query dasar
+$sql = "SELECT * FROM lowongan WHERE employer_id = $employerId";
 
+// Tambahkan filter jika ada
 if (!empty($keyword)) {
-    $sql .= " AND (judul LIKE ? OR perusahaan LIKE ?)";
-    $params[] = "%$keyword%";
-    $params[] = "%$keyword%";
-    $types .= "ss";
+    $sql .= " AND (judul LIKE '%$keyword%' OR perusahaan LIKE '%$keyword%')";
 }
 
 if (!empty($kategori)) {
-    $sql .= " AND kategori = ?";
-    $params[] = $kategori;
-    $types .= "s";
+    $sql .= " AND kategori = '$kategori'";
 }
 
 if (!empty($lokasi)) {
-    $sql .= " AND lokasi LIKE ?";
-    $params[] = "%$lokasi%";
-    $types .= "s";
+    $sql .= " AND lokasi LIKE '%$lokasi%'";
 }
 
 $sql .= " ORDER BY id DESC";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
-$stmt->execute();
-$result = $stmt->get_result();
+// Eksekusi query
+$result = mysqli_query($conn, $sql);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

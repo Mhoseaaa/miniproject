@@ -48,44 +48,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Cek apakah email sudah digunakan
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id FROM employers WHERE email = ?");
-        if ($stmt === false) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        
-        $stmt->bind_param("s", $email);
-        if (!$stmt->execute()) {
-            die("Error executing statement: " . $stmt->error);
-        }
-        $stmt->store_result();
+        $sql = "SELECT id FROM employers WHERE email = '$email'";
+        $result = mysqli_query($conn, $sql);
 
-        if ($stmt->num_rows > 0) {
+        if (!$result) {
+            die("Query error: " . mysqli_error($conn));
+        }
+
+        if (mysqli_num_rows($result) > 0) {
             $errors['email'] = "Email sudah terdaftar";
         }
-        $stmt->close();
     }
 
     // Simpan ke database
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO employers (nama_perusahaan, email, password, no_telepon, alamat) VALUES (?, ?, ?, ?, ?)");
-        if ($stmt === false) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        
-        $stmt->bind_param("sssss", $nama_perusahaan, $email, $hashed_password, $no_telepon, $alamat);
 
-        if ($stmt->execute()) {
+        $sql = "INSERT INTO employers (nama_perusahaan, email, password, no_telepon, alamat) 
+                VALUES ('$nama_perusahaan', '$email', '$hashed_password', '$no_telepon', '$alamat')";
+
+        if (mysqli_query($conn, $sql)) {
             $_SESSION['registration_success'] = true;
             header("Location: login_employer.php");
             exit;
         } else {
-            $errors['general'] = "Gagal mendaftar. Error: " . $stmt->error;
+            $errors['general'] = "Gagal mendaftar. Error: " . mysqli_error($conn);
         }
-        $stmt->close();
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

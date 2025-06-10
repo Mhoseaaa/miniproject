@@ -21,11 +21,11 @@ if (!isset($_SESSION['employer_id'])) {
 $employer_id = $_SESSION['employer_id'];
 
 // Ambil data employer dari database
-$stmt = $conn->prepare("SELECT nama_perusahaan FROM employers WHERE id = ?");
-$stmt->bind_param("i", $employer_id);
-$stmt->execute();
-$resultEmployer = $stmt->get_result();
-$employer = $resultEmployer->fetch_assoc();
+$employer_id = $_SESSION['employer_id'];
+$employer_id_safe = intval($employer_id); // Tetap filter integer
+$sql = "SELECT nama_perusahaan FROM employers WHERE id = $employer_id_safe";
+$resultEmployer = mysqli_query($conn, $sql);
+$employer = mysqli_fetch_assoc($resultEmployer);
 if (!$employer) {
     session_destroy();
     header("Location: login_employer.php");
@@ -35,20 +35,19 @@ if (!$employer) {
 $nama_perusahaan = htmlspecialchars($employer['nama_perusahaan']);
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $judul         = $_POST['judul'] ?? '';
-    $perusahaan    = $_POST['perusahaan'] ?? '';
-    $kategori      = $_POST['kategori'] ?? '';
-    $lokasi        = $_POST['lokasi'] ?? '';
+    $judul         = mysqli_real_escape_string($conn, $_POST['judul'] ?? '');
+    $perusahaan    = mysqli_real_escape_string($conn, $_POST['perusahaan'] ?? '');
+    $kategori      = mysqli_real_escape_string($conn, $_POST['kategori'] ?? '');
+    $lokasi        = mysqli_real_escape_string($conn, $_POST['lokasi'] ?? '');
     $gaji_min      = (int) str_replace('.', '', $_POST['gaji_min'] ?? '0');
     $gaji_max      = (int) str_replace('.', '', $_POST['gaji_max'] ?? '0');
-    $tipe          = $_POST['tipe'] ?? '';
-    $deskripsi     = $_POST['deskripsi'] ?? '';
-    $kualifikasi   = $_POST['kualifikasi'] ?? '';
-    $batas_lamaran = $_POST['batas_lamaran'] ?? null;
-    
-    $gaji_display = formatRupiah($gaji_min) . " - " . formatRupiah($gaji_max) . " per month";
+    $tipe          = mysqli_real_escape_string($conn, $_POST['tipe'] ?? '');
+    $deskripsi     = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
+    $kualifikasi   = mysqli_real_escape_string($conn, $_POST['kualifikasi'] ?? '');
+    $batas_lamaran = mysqli_real_escape_string($conn, $_POST['batas_lamaran'] ?? null);
 
-    // === Upload Logo ===
+    $gaji_display  = formatRupiah($gaji_min) . " - " . formatRupiah($gaji_max) . " per month";
+
     $upload_folder_rel = "assets/logo_perusahaan/";
     $upload_folder_abs = __DIR__ . '/' . $upload_folder_rel;
 
@@ -63,13 +62,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $logo_path_abs = $upload_folder_abs . $logo_name;
 
         if (move_uploaded_file($_FILES["logo"]["tmp_name"], $logo_path_abs)) {
-            $stmt = $conn->prepare("INSERT INTO lowongan (employer_id, judul, perusahaan, kategori, lokasi, gaji_min, gaji_max, gaji_display, tipe, logo, deskripsi, kualifikasi, batas_lamaran) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("issssiissssss", $employer_id, $judul, $perusahaan, $kategori, $lokasi, $gaji_min, $gaji_max, $gaji_display, $tipe, $logo_path_rel, $deskripsi, $kualifikasi, $batas_lamaran);
-            
-            if ($stmt->execute()) {
+            $sql_insert = "INSERT INTO lowongan 
+            (employer_id, judul, perusahaan, kategori, lokasi, gaji_min, gaji_max, gaji_display, tipe, logo, deskripsi, kualifikasi, batas_lamaran) 
+            VALUES (
+                '$employer_id_safe', 
+                '$judul', 
+                '$perusahaan', 
+                '$kategori', 
+                '$lokasi', 
+                '$gaji_min', 
+                '$gaji_max', 
+                '$gaji_display', 
+                '$tipe', 
+                '$logo_path_rel', 
+                '$deskripsi', 
+                '$kualifikasi', 
+                '$batas_lamaran')";
+
+            if (mysqli_query($conn, $sql_insert)) {
                 $success = "Lowongan berhasil ditambahkan.";
             } else {
-                $error = "Gagal menambahkan lowongan: " . $conn->error;
+                $error = "Gagal menambahkan lowongan: " . mysqli_error($conn);
             }
         } else {
             $error = "Gagal mengunggah logo.";

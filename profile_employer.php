@@ -9,12 +9,13 @@ if (!isset($_SESSION['employer_email'])) {
 include 'koneksi.php';
 
 $employerEmail = $_SESSION['employer_email'];
+// Escape untuk mencegah SQL Injection (masih penting meski tidak pakai bind_param)
+$employerEmail = mysqli_real_escape_string($conn, $employerEmail);
 
-$stmt = $conn->prepare("SELECT nama_perusahaan, email, no_telepon, alamat FROM employers WHERE email = ?");
-$stmt->bind_param("s", $employerEmail);
-$stmt->execute();
-$result = $stmt->get_result();
-$employer = $result->fetch_assoc();
+$query = "SELECT nama_perusahaan, email, no_telepon, alamat FROM employers WHERE email = '$employerEmail' LIMIT 1";
+$result = mysqli_query($conn, $query);
+
+$employer = mysqli_fetch_assoc($result);
 
 if (!$employer) {
     session_destroy();
@@ -22,6 +23,7 @@ if (!$employer) {
     exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
