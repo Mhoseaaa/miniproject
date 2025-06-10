@@ -17,15 +17,14 @@ if (!isset($_SESSION['employer_id'])) {
     exit();
 }
 
-
 $employer_id = $_SESSION['employer_id'];
+$employer_id_safe = intval($employer_id);
 
-// Ambil data employer dari database
-$employer_id = $_SESSION['employer_id'];
-$employer_id_safe = intval($employer_id); // Tetap filter integer
-$sql = "SELECT nama_perusahaan FROM employers WHERE id = $employer_id_safe";
+// Ambil data employer termasuk logo dari database
+$sql = "SELECT nama_perusahaan, logo FROM employers WHERE id = $employer_id_safe";
 $resultEmployer = mysqli_query($conn, $sql);
 $employer = mysqli_fetch_assoc($resultEmployer);
+
 if (!$employer) {
     session_destroy();
     header("Location: login_employer.php");
@@ -33,6 +32,7 @@ if (!$employer) {
 }
 
 $nama_perusahaan = htmlspecialchars($employer['nama_perusahaan']);
+$company_logo = $employer['logo']; // Ambil path logo dari tabel employers
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $judul         = mysqli_real_escape_string($conn, $_POST['judul'] ?? '');
@@ -48,47 +48,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $gaji_display  = formatRupiah($gaji_min) . " - " . formatRupiah($gaji_max) . " per month";
 
-    $upload_folder_rel = "assets/logo_perusahaan/";
-    $upload_folder_abs = __DIR__ . '/' . $upload_folder_rel;
+    // Gunakan logo perusahaan yang sudah ada
+    $logo_path_rel = $company_logo;
 
-    if (!is_dir($upload_folder_abs)) {
-        mkdir($upload_folder_abs, 0777, true);
-    }
+    $sql_insert = "INSERT INTO lowongan 
+        (employer_id, judul, perusahaan, kategori, lokasi, gaji_min, gaji_max, gaji_display, tipe, logo, deskripsi, kualifikasi, batas_lamaran) 
+        VALUES (
+            '$employer_id_safe', 
+            '$judul', 
+            '$perusahaan', 
+            '$kategori', 
+            '$lokasi', 
+            '$gaji_min', 
+            '$gaji_max', 
+            '$gaji_display', 
+            '$tipe', 
+            '$logo_path_rel', 
+            '$deskripsi', 
+            '$kualifikasi', 
+            '$batas_lamaran')";
 
-    if (isset($_FILES["logo"]) && $_FILES["logo"]["error"] === 0) {
-        $logo_file     = basename($_FILES["logo"]["name"]);
-        $logo_name     = time() . "-" . preg_replace('/\s+/', '-', $logo_file);
-        $logo_path_rel = $upload_folder_rel . $logo_name;
-        $logo_path_abs = $upload_folder_abs . $logo_name;
-
-        if (move_uploaded_file($_FILES["logo"]["tmp_name"], $logo_path_abs)) {
-            $sql_insert = "INSERT INTO lowongan 
-            (employer_id, judul, perusahaan, kategori, lokasi, gaji_min, gaji_max, gaji_display, tipe, logo, deskripsi, kualifikasi, batas_lamaran) 
-            VALUES (
-                '$employer_id_safe', 
-                '$judul', 
-                '$perusahaan', 
-                '$kategori', 
-                '$lokasi', 
-                '$gaji_min', 
-                '$gaji_max', 
-                '$gaji_display', 
-                '$tipe', 
-                '$logo_path_rel', 
-                '$deskripsi', 
-                '$kualifikasi', 
-                '$batas_lamaran')";
-
-            if (mysqli_query($conn, $sql_insert)) {
-                $success = "Lowongan berhasil ditambahkan.";
-            } else {
-                $error = "Gagal menambahkan lowongan: " . mysqli_error($conn);
-            }
-        } else {
-            $error = "Gagal mengunggah logo.";
-        }
+    if (mysqli_query($conn, $sql_insert)) {
+        $success = "Lowongan berhasil ditambahkan.";
+        // Redirect atau tampilkan pesan sukses
+        header("Location: dashboard_employer.php?success=1");
+        exit();
     } else {
-        $error = "Logo belum diunggah atau terjadi error.";
+        $error = "Gagal menambahkan lowongan: " . mysqli_error($conn);
     }
 }
 ?>
@@ -394,6 +380,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     <div class="register-container">
         <h1 class="register-title">Tambah Lowongan Pekerjaan</h1>
+
+        <?php if (!empty($company_logo)): ?>
+            <div class="form-group">
+                <label>Logo Perusahaan Saat Ini:</label><br>
+                <img src="<?= htmlspecialchars($company_logo) ?>" alt="Logo Perusahaan" style="max-height: 100px;">
+            </div>
+            <?php endif; ?>
         
         <?php if(isset($error)): ?>
             <div class="error-message" style="text-align: center; margin-bottom: 20px;">
@@ -472,10 +465,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="date" name="batas_lamaran" required>
             </div>
 
-            <div class="form-group">
-                <label>Upload Logo:</label><br>
-                <input type="file" name="logo" accept="image/*" required>
-            </div>
+           
+
 
             
             <button type="submit" class="register-button">Upload</button>

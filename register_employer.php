@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirm_password = $_POST['confirm_password'] ?? '';
     $no_telepon = trim($_POST['no_telepon'] ?? '');
     $alamat = trim($_POST['alamat'] ?? '');
+    $logo_path = null;
 
     // Validasi
     if (empty($nama_perusahaan)) {
@@ -60,14 +61,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    // Proses upload logo
+    $upload_folder_rel = "assets/logo_perusahaan/";
+    $upload_folder_abs = __DIR__ . '/' . $upload_folder_rel;
+
+    if (!is_dir($upload_folder_abs)) {
+        mkdir($upload_folder_abs, 0777, true);
+    }
+
+    if (isset($_FILES["logo"]) && $_FILES["logo"]["error"] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $file_type = $_FILES["logo"]["type"];
+        
+        if (in_array($file_type, $allowed_types)) {
+            $logo_file = basename($_FILES["logo"]["name"]);
+            $logo_name = time() . "-" . preg_replace('/\s+/', '-', $logo_file);
+            $logo_path_rel = $upload_folder_rel . $logo_name;
+            $logo_path_abs = $upload_folder_abs . $logo_name;
+
+            if (move_uploaded_file($_FILES["logo"]["tmp_name"], $logo_path_abs)) {
+                $logo_path = $logo_path_rel;
+            } else {
+                $errors['logo'] = "Gagal mengupload logo";
+            }
+        } else {
+            $errors['logo'] = "Format file tidak didukung. Hanya JPEG, PNG, dan GIF yang diperbolehkan";
+        }
+    } else {
+        // Logo tidak wajib diisi, jadi tidak perlu error jika tidak diupload
+    }
+
     // Simpan ke database
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        $sql = "INSERT INTO employers (nama_perusahaan, email, password, no_telepon, alamat) 
-                VALUES ('$nama_perusahaan', '$email', '$hashed_password', '$no_telepon', '$alamat')";
-
-        if (mysqli_query($conn, $sql)) {
+        $sql = "INSERT INTO employers (nama_perusahaan, email, password, no_telepon, alamat, logo) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssssss", $nama_perusahaan, $email, $hashed_password, $no_telepon, $alamat, $logo_path);
+        
+        if (mysqli_stmt_execute($stmt)) {
             $_SESSION['registration_success'] = true;
             header("Location: login_employer.php");
             exit;
@@ -362,7 +396,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="register-container">
         <h1 class="register-title">Daftar Sebagai Employer</h1>
         
-        <form method="POST" action="register_employer.php">
+        <form method="POST" action="register_employer.php" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nama_perusahaan">Nama Perusahaan</label>
                 <input type="text" id="nama_perusahaan" name="nama_perusahaan" required placeholder="Masukkan nama perusahaan"
@@ -412,6 +446,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                        value="<?= htmlspecialchars($_POST['alamat'] ?? '') ?>">
                 <?php if(isset($errors['alamat'])): ?>
                     <div class="error-message"><?= $errors['alamat'] ?></div>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Logo Perusahaan</label>
+                <input type="file" id="logo" name="logo" accept="image/jpeg, image/png, image/gif"  required>
+                <?php if(isset($errors['logo'])): ?>
+                    <div class="error-message"><?= $errors['logo'] ?></div>
                 <?php endif; ?>
             </div>
             

@@ -9,10 +9,9 @@ if (!isset($_SESSION['employer_email'])) {
 include 'koneksi.php';
 
 $employerEmail = $_SESSION['employer_email'];
-// Escape untuk mencegah SQL Injection (masih penting meski tidak pakai bind_param)
 $employerEmail = mysqli_real_escape_string($conn, $employerEmail);
 
-$query = "SELECT nama_perusahaan, email, no_telepon, alamat FROM employers WHERE email = '$employerEmail' LIMIT 1";
+$query = "SELECT nama_perusahaan, email, no_telepon, alamat, logo FROM employers WHERE email = '$employerEmail' LIMIT 1";
 $result = mysqli_query($conn, $query);
 
 $employer = mysqli_fetch_assoc($result);
@@ -22,9 +21,12 @@ if (!$employer) {
     header("Location: login_employer.php");
     exit;
 }
+
+// Debug: Tampilkan data employer (bisa dihapus setelah debugging)
+// echo "<pre>";
+// print_r($employer);
+// echo "</pre>";
 ?>
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -222,6 +224,19 @@ if (!$employer) {
 
 <div class="profile-container">
     <h2>Profil Perusahaan</h2>
+    <?php 
+    // Perbaikan utama: Mengakses $employer['logo'] langsung
+    if (!empty($employer['logo']) && file_exists($employer['logo'])): 
+    ?>
+    <div style="text-align:center; margin-bottom: 20px;">
+        <img src="<?= htmlspecialchars($employer['logo']) ?>" alt="Logo Perusahaan" style="max-width:150px; max-height:150px; border-radius:10px; box-shadow: 0 0 8px rgba(0,0,0,0.1);" />
+    </div>
+    <?php else: ?>
+    <div style="text-align:center; margin-bottom: 20px; color: #666;">
+        Logo tidak tersedia (Debug: <?= isset($employer['logo']) ? 'Path: ' . htmlspecialchars($employer['logo']) : 'Kolom logo kosong' ?>)
+    </div>
+    <?php endif; ?>
+
     <div class="profile-item">
         <div class="label">Nama Perusahaan:</div>
         <div class="value"><?= htmlspecialchars($employer['nama_perusahaan']) ?></div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 09, 2025 at 04:40 PM
+-- Generation Time: Jun 10, 2025 at 05:27 AM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 8.0.2
 
@@ -34,6 +34,7 @@ CREATE TABLE `employers` (
   `password` varchar(255) NOT NULL,
   `no_telepon` varchar(20) NOT NULL,
   `alamat` text DEFAULT NULL,
+  `logo` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -41,9 +42,8 @@ CREATE TABLE `employers` (
 -- Dumping data for table `employers`
 --
 
-INSERT INTO `employers` (`id`, `nama_perusahaan`, `email`, `password`, `no_telepon`, `alamat`, `created_at`) VALUES
-(1, 'Test Company', 'test_company@gmail.com', '$2y$10$1MGR.ohQbyViaQecDI6uMerA08k0TFQFb5ikH3pj4/A5ERxpxnSL6', '09812345', 'indo', '2025-06-09 12:10:59'),
-(2, 'Yokai', 'yokai@gmail.com', '$2y$10$Qp1x/wZVcV7k9WL349QV7OzWC2ANsezd1DyRoKe99y4os80n1l9X6', '08924543534', 'Jogya', '2025-06-09 13:33:31');
+INSERT INTO `employers` (`id`, `nama_perusahaan`, `email`, `password`, `no_telepon`, `alamat`, `logo`, `created_at`) VALUES
+(5, 'King', 'king@gmail.com', '$2y$10$LN4NY7wyTsD3l.cG4pbmEuz1tKp9ye4pyuz9TEP.WdovtjCNiaF22', '08978978', 'Indonesia', 'assets/logo_perusahaan/1749525844-kids-super-o.png', '2025-06-10 03:24:04');
 
 -- --------------------------------------------------------
 
@@ -75,7 +75,7 @@ CREATE TABLE `lowongan` (
 --
 
 INSERT INTO `lowongan` (`id`, `employer_id`, `judul`, `perusahaan`, `kategori`, `lokasi`, `gaji_min`, `gaji_max`, `gaji_display`, `tipe`, `logo`, `deskripsi`, `kualifikasi`, `batas_lamaran`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Barista', 'Test Company', 'Food & Beverage', 'Jakarta, Indonesia', 1000000, 2000000, 'Rp 1.000.000 - Rp 2.000.000 per month', 'Full-time', 'assets/logo_perusahaan/1749476488-download.jfif', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '2025-06-30', '2025-06-09 13:41:28', '2025-06-09 13:41:28');
+(1, 5, 'Manager Marketing', 'King', 'Marketing', 'Yogyakarta, Indonesia', 1500000, 2000000, 'Rp 1.500.000 - Rp 2.000.000 per month', 'Full-time', 'assets/logo_perusahaan/1749525844-kids-super-o.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '2025-06-30', '2025-06-10 03:25:50', '2025-06-10 03:25:50');
 
 -- --------------------------------------------------------
 
@@ -131,7 +131,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `employers`
 --
 ALTER TABLE `employers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `lowongan`
