@@ -50,16 +50,6 @@ $redirect = $_GET['redirect'] ?? '';
     <title>Masuk - JobSeeker</title>
     <link rel="stylesheet" href="navbar.css">
     <style>
-        /* Layout: sticky footer */
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-        
         .login-button {
             width: 100%;
             padding: 14px;
@@ -140,11 +130,6 @@ $redirect = $_GET['redirect'] ?? '';
                 text-align: center;
                 margin-bottom: 20px;
             }
-            
-            .login-wrapper {
-                margin-top: 40px;
-                max-width: 90%;
-            }
         }
 
         /* FOOTER */
@@ -191,12 +176,11 @@ $redirect = $_GET['redirect'] ?? '';
             text-decoration: none;
         }
         .outline-button:hover { background: #001f54; color: white; }
-        .breadcrumb { list-style: none; display: flex; gap: 5px; margin: 0; }
         .nav-item { position: relative; font-weight: bold; text-decoration: none; color: black; padding-bottom: 5px; }
         .nav-item::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #001f54; transform: scaleX(0); transition: transform 0.3s; }
         .nav-item.active::after, .nav-item:hover::after { transform: scaleX(1); }
         /* Login form */
-        .login-wrapper { max-width: 550px; margin: 0 auto; }
+        .login-wrapper { max-width: 550px; margin: 0 auto; margin-top: 50px;}
         .employer-link-container { text-align: right; margin-bottom: 10px; }
         .employer-link { color: #001f54; font-weight: bold; text-decoration: none; font-size: 16px; transition: 0.3s; }
         .employer-link:hover { text-decoration: underline; }
