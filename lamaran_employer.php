@@ -103,11 +103,25 @@ $result = mysqli_query($conn, $sql);
         }
 
         .lamaran-status {
-            background-color: #4CAF50;
-            color: white;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
+        }
+
+        .lamaran-status.pending {
+            background-color: gold;
+            color: #333;
+        }
+
+        .lamaran-status.ditolak {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .lamaran-status.diterima {
+            background-color: #4CAF50;
+            color: white;
         }
 
         .lamaran-detail {
@@ -298,7 +312,7 @@ $result = mysqli_query($conn, $sql);
                     <div class="lamaran-card">
                         <div class="lamaran-header">
                             <div class="lamaran-title"><?= htmlspecialchars($row['nama_pelamar']) ?></div>
-                            <div class="lamaran-status"><?= htmlspecialchars($row['status']) ?></div>
+                            <div class="lamaran-status <?= strtolower(htmlspecialchars($row['status'])) ?>"><?= htmlspecialchars($row['status']) ?></div>
                         </div>
 
                         <div class="lamaran-detail">
