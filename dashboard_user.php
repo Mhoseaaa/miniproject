@@ -10,18 +10,18 @@ include 'koneksi.php';
 
 $userEmail = $_SESSION['user_email'];
 
-// Ambil data user dari database
-$stmt = $conn->prepare("SELECT name, email FROM users WHERE email = ?");
-$stmt->bind_param("s", $userEmail);
-$stmt->execute();
-$resultUser = $stmt->get_result();
-$user = $resultUser->fetch_assoc();
+// Ambil data user dari database TANPA prepared statement
+$userEmailEsc = $conn->real_escape_string($userEmail);
+$sqlUser = "SELECT name, email FROM users WHERE email = '$userEmailEsc'";
+$resultUser = $conn->query($sqlUser);
 
-if (!$user) {
+if (!$resultUser || $resultUser->num_rows === 0) {
     session_destroy();
     header("Location: login_user.php");
     exit;
 }
+
+$user = $resultUser->fetch_assoc();
 
 // Ambil parameter filter
 $keyword  = $_GET['keyword'] ?? '';
@@ -48,6 +48,7 @@ if (!$result) {
     die("Query error: " . $conn->error);
 }
 ?>
+
 
 
 

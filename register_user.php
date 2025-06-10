@@ -38,45 +38,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Cek apakah email sudah digunakan
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        if ($stmt === false) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        
-        $stmt->bind_param("s", $email);
-        if (!$stmt->execute()) {
-            die("Error executing statement: " . $stmt->error);
-        }
-        $stmt->store_result();
+        $escaped_email = mysqli_real_escape_string($conn, $email);
+        $sql_check = "SELECT id FROM users WHERE email = '$escaped_email'";
+        $result_check = mysqli_query($conn, $sql_check);
 
-        if ($stmt->num_rows > 0) {
+        if (!$result_check) {
+            die("Error checking email: " . mysqli_error($conn));
+        }
+
+        if (mysqli_num_rows($result_check) > 0) {
             $errors['email'] = "Email sudah terdaftar";
         }
-        $stmt->close();
     }
 
     // Simpan ke database
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-        if ($stmt === false) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        
-        $stmt->bind_param("sss", $name, $email, $hashed_password);
+        $escaped_name = mysqli_real_escape_string($conn, $name);
+        $escaped_email = mysqli_real_escape_string($conn, $email);
+        $escaped_password = mysqli_real_escape_string($conn, $hashed_password);
 
-        if ($stmt->execute()) {
+        $sql_insert = "INSERT INTO users (name, email, password) VALUES ('$escaped_name', '$escaped_email', '$escaped_password')";
+
+        if (mysqli_query($conn, $sql_insert)) {
             $_SESSION['registration_success'] = true;
             header("Location: login_user.php");
             exit;
         } else {
-            // Tambahkan pesan error yang lebih spesifik
-            $errors['general'] = "Gagal mendaftar. Error: " . $stmt->error;
+            $errors['general'] = "Gagal mendaftar. Error: " . mysqli_error($conn);
         }
-        $stmt->close();
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -342,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
         </a>
         <div class="nav-right">
-            <a href="login2.php"><button class="outline-button">Masuk</button></a>
+            <a href="login_user.php"><button class="outline-button">Masuk</button></a>
             <ul class="breadcrumb">
                 <li><a href="index.php" class="nav-item">Beranda</a></li>
                 <li><span>/</span></li>

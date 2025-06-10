@@ -2,32 +2,34 @@
 session_start();
 include 'koneksi.php';
 
-if(isset($_SESSION['employer_id'])) {
+if (isset($_SESSION['employer_id'])) {
     $redirect = $_GET['redirect'] ?? 'dashboard_employer.php';
     header("Location: $redirect");
     exit;
 }
 
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $email    = $_POST['email']    ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if(empty($email) || empty($password)) {
+
+    if (empty($email) || empty($password)) {
         $error = "Email dan password harus diisi";
     } else {
-        $stmt = $conn->prepare("SELECT id, nama_perusahaan, email, password FROM employers WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if($result->num_rows === 1) {
-            $employer = $result->fetch_assoc();
-            
-            if(password_verify($password, $employer['password'])) {
-                $_SESSION['employer_id'] = $employer['id'];
-                $_SESSION['employer_name'] = $employer['nama_perusahaan'];
+        // ——— QUERY BIASA TANPA PREPARED STATEMENT ———
+        $email_safe = mysqli_real_escape_string($conn, $email);
+        $sql        = "SELECT id, nama_perusahaan, email, password 
+                       FROM employers 
+                       WHERE email = '$email_safe'";
+        $result     = mysqli_query($conn, $sql);
+
+        if ($result && mysqli_num_rows($result) === 1) {
+            $employer = mysqli_fetch_assoc($result);
+
+            if (password_verify($password, $employer['password'])) {
+                $_SESSION['employer_id']    = $employer['id'];
+                $_SESSION['employer_name']  = $employer['nama_perusahaan'];
                 $_SESSION['employer_email'] = $employer['email'];
-                
+
                 $redirect = $_GET['redirect'] ?? 'dashboard_employer.php';
                 header("Location: $redirect");
                 exit;
@@ -37,13 +39,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $error = "Email atau password salah";
         }
-        
-        $stmt->close();
     }
 }
 
 $redirect = $_GET['redirect'] ?? '';
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

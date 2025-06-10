@@ -10,19 +10,18 @@ include 'koneksi.php';
 
 $userEmail = $_SESSION['user_email'];
 
-$stmt = $conn->prepare("SELECT name, email FROM users WHERE email = ?");
-$stmt->bind_param("s", $userEmail);
-$stmt->execute();
-$result = $stmt->get_result();
+// GANTI DENGAN QUERY BIASA (TANPA BIND)
+$sql = "SELECT name, email FROM users WHERE email = '$userEmail'";
+$result = $conn->query($sql);
 $user = $result->fetch_assoc();
 
 if (!$user) {
-    // Kalau user tidak ditemukan, logout
     session_destroy();
     header("Location: login_user.php");
     exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

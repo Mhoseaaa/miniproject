@@ -2,32 +2,32 @@
 session_start();
 include 'koneksi.php';
 
-if(isset($_SESSION['user_email'])) {
+if (isset($_SESSION['user_email'])) {
     $redirect = $_GET['redirect'] ?? 'dashboard_user.php';
     header("Location: $redirect");
     exit;
 }
 
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if(empty($email) || empty($password)) {
+
+    if (empty($email) || empty($password)) {
         $error = "Email dan password harus diisi";
     } else {
-        $stmt = $conn->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if($result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            
-            if(password_verify($password, $user['password'])) {
+        // Query biasa tanpa prepared statement
+        $email_escaped = mysqli_real_escape_string($conn, $email);
+        $query = "SELECT id, name, email, password FROM users WHERE email = '$email_escaped'";
+        $result = mysqli_query($conn, $query);
+
+        if ($result && mysqli_num_rows($result) === 1) {
+            $user = mysqli_fetch_assoc($result);
+
+            if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
-                
+
                 $redirect = $_GET['redirect'] ?? 'dashboard_user.php';
                 header("Location: $redirect");
                 exit;
@@ -37,13 +37,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $error = "Email atau password salah";
         }
-        
-        $stmt->close();
     }
 }
 
 $redirect = $_GET['redirect'] ?? '';
 ?>
+
 
 
 <!DOCTYPE html>
