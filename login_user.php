@@ -48,7 +48,8 @@ $redirect = $_GET['redirect'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - JobSeeker</title>
-    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="styles/logreg_user.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
     <style>
         /* Layout: sticky footer */
         html, body {
@@ -59,47 +60,30 @@ $redirect = $_GET['redirect'] ?? '';
             display: flex;
             flex-direction: column;
         }
-        
-        .login-button {
+        main.main-content {
+            flex: 1;
+            padding-top: 80px; /* account for navbar height */
+        }
+        /* Navbar fixed on top */
+        .navbar-container {
             width: 100%;
-            padding: 14px;
-            background-color: #001f54;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .login-button:hover {
-            background-color: #000e27;
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 15px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-        
-        .login-footer a {
-            color: #001f54;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #ff007f;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
+        .logo img { width: 150px; height: auto; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
         .outline-button {
             background: white;
             color: #001f54;
@@ -109,85 +93,6 @@ $redirect = $_GET['redirect'] ?? '';
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        .outline-button:hover {
-            background: #001f54;
-            color: white;
-        }
-
-        .employer-link-container {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-        
-        .employer-link {
-            color: #001f54;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-right:-50px;
-        }
-
-        .employer-link:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .jobseeker-link-container {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            
-            .login-wrapper {
-                margin-top: 40px;
-                max-width: 90%;
-            }
-        }
-
-        /* FOOTER */
-        .footer {
-            background-color: #001f54;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .footer-container {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: auto;
-            text-align: left;
-        }
-
-        .footer-section {
-            flex: 1;
-            min-width: 250px;
-            margin: 10px;
-        }
-
-        .footer-section h3,
-        .footer-section h4 {
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .footer-section ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-section ul li {
-            margin: 5px 0;
-        }
-
-        .footer-section ul li a {
-            color: white;
             text-decoration: none;
         }
         .outline-button:hover { background: #001f54; color: white; }
@@ -233,12 +138,14 @@ $redirect = $_GET['redirect'] ?? '';
     <!-- Navbar -->
     <div class="navbar-container">
         <nav class="navbar">
-            <a href="employer/dashboard_employer.php" class="logo">
-                <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
-            </a>
+            <a href="index.php" class="logo"><img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo"></a>
             <div class="nav-right">
-                <a href="login_user.php" class="nav-item active">Masuk</a>
-                <a href="register_user.php" class="nav-item">Daftar</a>
+                <a href="register_user.php" class="outline-button">Daftar</a>
+                <ul class="breadcrumb">
+                    <li><a href="index.php" class="nav-item">Beranda</a></li>
+                    <li><span>/</span></li>
+                    <li><a href="login_user.php" class="nav-item active">Masuk</a></li>
+                </ul>
             </div>
         </nav>
     </div>
@@ -267,6 +174,7 @@ $redirect = $_GET['redirect'] ?? '';
                 </form>
                 <div class="login-footer">
                     Belum punya akun? <a href="register_user.php">Daftar disini</a><br>
+                    <a href="forgot-password.php">Lupa password?</a>
                 </div>
             </div>
         </div>
