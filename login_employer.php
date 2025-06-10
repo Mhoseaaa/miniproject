@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $redirect = $_GET['redirect'] ?? '';
 ?>
 
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -168,78 +167,28 @@ $redirect = $_GET['redirect'] ?? '';
             font-weight: bold;
             transition: all 0.3s ease;
         }
-
-        .outline-button:hover {
-            background: #001f54;
-            color: white;
+        .form-group input:focus { border-color: #001f54; outline: none; }
+        .login-button {
+            width: 100%; padding: 14px; background: #001f54; color: #fff;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+            transition: background 0.3s;
         }
+        .login-button:hover { background: #000e27; }
+        .login-footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+        .login-footer a { color: #001f54; font-weight: bold; text-decoration: none; }
+        .login-footer a:hover { text-decoration: underline; }
+        .error-message { color: #ff007f; text-align: center; margin-bottom: 20px; font-weight: bold; }
 
-        @media (max-width: 768px) {
-            .jobseeker-link-container {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            
-            .login-wrapper {
-                margin-top: 40px;
-                max-width: 90%;
-            }
-        }
-
-        /* FOOTER */
-        .footer {
-            background-color: #001f54;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .footer-container {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: auto;
-            text-align: left;
-        }
-
-        .footer-section {
-            flex: 1;
-            min-width: 250px;
-            margin: 10px;
-        }
-
-        .footer-section h3,
-        .footer-section h4 {
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .footer-section ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-section ul li {
-            margin: 5px 0;
-        }
-
-        .footer-section ul li a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-section ul li a:hover {
-            color: #ff007f;
-        }
-
-        .footer-copy {
-            margin-top: 20px;
-            font-size: 14px;
-            opacity: 0.7;
-        }
+        /* Footer */
+        .footer { background: #001f54; color: #fff; padding: 40px 20px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .footer-section { flex: 1; min-width: 200px; margin: 0 10px; }
+        .footer-section h3, .footer-section h4 { font-size: 18px; margin-bottom: 8px; }
+        .footer-section p, .footer-section ul li { font-size: 14px; margin-bottom: 6px; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .footer-section ul li a:hover { color: #ff007f; }
+        .footer-copy { background: #000e27; text-align: center; padding: 10px 0; font-size: 13px; opacity: 0.8; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -257,75 +206,69 @@ $redirect = $_GET['redirect'] ?? '';
         </nav>
     </div>
 
-<!-- Login Form with Jobseeker Link -->
-<div class="login-wrapper">
-    <div class="jobseeker-link-container">
-        <a href="login_user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
-    </div>
-    
-    <div class="login-container">
-        <h1 class="login-title">Masuk Sebagai Employer</h1>
-        
-        <?php if(isset($error)): ?>
-            <div class="error-message"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        
-        <form method="POST" action="login_employer.php<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>">
-            <div class="form-group">
-                <label for="email">Email Perusahaan</label>
-                <input type="email" id="email" name="email" required placeholder="contoh@perusahaan.com">
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="login-wrapper">
+            <div class="jobseeker-link-container">
+                <a href="login_user.php" class="jobseeker-link">Apakah Anda mencari pekerjaan?</a>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Masukkan password">
+            <div class="login-container">
+                <h1 class="login-title">Masuk Sebagai Employer</h1>
+                <?php if (isset($error)): ?>
+                    <div class="error-message"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
+                <form method="POST" action="login_employer.php<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>">
+                    <div class="form-group">
+                        <label for="email">Email Perusahaan</label>
+                        <input type="email" id="email" name="email" required placeholder="contoh@perusahaan.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Masukkan password">
+                    </div>
+                    <button type="submit" class="login-button">MASUK</button>
+                </form>
+                <div class="login-footer">
+                    Belum punya akun employer? <a href="register_employer.php">Daftar disini</a><br>
+                    <a href="forgot-password.php">Lupa password?</a>
+                </div>
             </div>
-            
-            <button type="submit" class="login-button">MASUK</button>
-        </form>
-        
-        <div class="login-footer">
-            Belum punya akun employer? <a href="register_employer.php">Daftar disini</a><br>
-            <a href="forgot-password.php">Lupa password?</a>
         </div>
-    </div>
-</div>
+    </main>
 
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h3>JobSeeker</h3>
-            <p>Temudahkan pencarian kerja untuk masa depan yang lebih baik</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">        
+            <div class="footer-section">
+                <h3>JobSeeker</h3>
+                <p>Memudahkan pencarian kerja untuk masa depan yang lebih baik</p>
+            </div>
+            <div class="footer-section">
+                <h4>Perusahaan</h4>
+                <ul>
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Karir</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Dukungan</h4>
+                <ul>
+                    <li><a href="#">Pusat Bantuan</a></li>
+                    <li><a href="#">Kebijakan Privasi</a></li>
+                    <li><a href="#">Syarat & Ketentuan</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Kontak</h4>
+                <ul>
+                    <li>Email: info@jobseeker.id</li>
+                    <li>Telepon: (021) 1234-5678</li>
+                    <li>Alamat: Yogyakarta, Indonesia</li>
+                </ul>
+            </div>
         </div>
-        <div class="footer-section">
-            <h4>Perusahaan</h4>
-            <ul>
-                <li><a href="#">Tentang Kami</a></li>
-                <li><a href="#">Karir</a></li>
-                <li><a href="#">Blog</a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h4>Dukungan</h4>
-            <ul>
-                <li><a href="#">Pusat Bantuan</a></li>
-                <li><a href="#">Kebijakan Privasi</a></li>
-                <li><a href="#">Syarat & Ketentuan</a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h4>Kontak</h4>
-            <ul>
-                <li>Email: info@jobseeker.id</li>
-                <li>Telepon: (021) 1234-5678</li>
-                <li>Alamat: Yogyakarta, Indonesia</li>
-            </ul>
-        </div>
-    </div>
-    <div class="footer-copy">
-        <p>&copy; 2025 JobSeeker Indonesia. All Rights Reserved.</p>
-    </div>
-</footer>
-
+        <div class="footer-copy">&copy; 2025 JobSeeker Indonesia. All Rights Reserved.</div>
+    </footer>
 </body>
 </html>

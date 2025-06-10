@@ -50,68 +50,14 @@ $redirect = $_GET['redirect'] ?? '';
     <title>Masuk - JobSeeker</title>
     <link rel="stylesheet" href="navbar.css">
     <style>
-        .login-wrapper {
-            max-width: 550px;
-            margin: 80px auto 0;
+        /* Layout: sticky footer */
+        html, body {
+            height: 100%;
+            margin: 0;
         }
-        
-        .jobseeker-link-container {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-        
-        .jobseeker-link {
-            color: #001f54;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-right:-50px;
-        }
-
-        .jobseeker-link:hover {
-            text-decoration: underline;
-        }
-
-        .login-container {
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-        
-        .login-title {
-            color: #001f54;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: #001f54;
-            outline: none;
+        body {
+            display: flex;
+            flex-direction: column;
         }
         
         .login-button {
@@ -159,10 +105,9 @@ $redirect = $_GET['redirect'] ?? '';
             color: #001f54;
             border: 2px solid #001f54;
             padding: 8px 16px;
-            font-size: 16px;
             border-radius: 5px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
@@ -244,18 +189,44 @@ $redirect = $_GET['redirect'] ?? '';
         .footer-section ul li a {
             color: white;
             text-decoration: none;
-            transition: color 0.3s;
         }
-
-        .footer-section ul li a:hover {
-            color: #ff007f;
+        .outline-button:hover { background: #001f54; color: white; }
+        .breadcrumb { list-style: none; display: flex; gap: 5px; margin: 0; }
+        .nav-item { position: relative; font-weight: bold; text-decoration: none; color: black; padding-bottom: 5px; }
+        .nav-item::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #001f54; transform: scaleX(0); transition: transform 0.3s; }
+        .nav-item.active::after, .nav-item:hover::after { transform: scaleX(1); }
+        /* Login form */
+        .login-wrapper { max-width: 550px; margin: 0 auto; }
+        .employer-link-container { text-align: right; margin-bottom: 10px; }
+        .employer-link { color: #001f54; font-weight: bold; text-decoration: none; font-size: 16px; transition: 0.3s; }
+        .employer-link:hover { text-decoration: underline; }
+        .login-container {
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
-
-        .footer-copy {
-            margin-top: 20px;
-            font-size: 14px;
-            opacity: 0.7;
-        }
+        .login-title { color: #001f54; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; transition: border 0.3s; }
+        .form-group input:focus { border-color: #001f54; outline: none; }
+        .login-button { width: 100%; padding: 14px; background-color: #001f54; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .login-button:hover { background-color: #000e27; }
+        .login-footer { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+        .login-footer a { color: #001f54; font-weight: bold; text-decoration: none; }
+        .login-footer a:hover { text-decoration: underline; }
+        .error-message { color: #ff007f; text-align: center; margin-bottom: 20px; font-weight: bold; }
+        /* Footer */
+        .footer { background-color: #001f54; color: #fff; padding: 40px 20px; }
+        .footer-container { display: flex; justify-content: space-between; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+        .footer-section { flex: 1; min-width: 200px; margin: 0 10px; }
+        .footer-section h3, .footer-section h4 { font-size: 18px; margin-bottom: 8px; }
+        .footer-section p, .footer-section ul li { font-size: 14px; margin-bottom: 6px; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .footer-section ul li a:hover { color: #ff007f; }
+        .footer-copy { background-color: #000e27; text-align: center; padding: 10px 0; font-size: 13px; opacity: 0.8; margin-top: 20px; }
     </style>
 </head>
 <body>
