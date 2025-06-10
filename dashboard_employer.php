@@ -1,610 +1,440 @@
 <?php
+// dashboard_employer.php
+include 'koneksi.php';
 session_start();
 
+// Pastikan employer sudah login
 if (!isset($_SESSION['employer_id'])) {
     header("Location: login_employer.php");
-    exit;
+    exit();
 }
 
-include 'koneksi.php';
-
-$employerId = $_SESSION['employer_id'];
-
-// Escape input untuk mencegah SQL injection
-$keyword  = isset($_GET['keyword']) ? mysqli_real_escape_string($conn, $_GET['keyword']) : '';
-$lokasi   = isset($_GET['lokasi']) ? mysqli_real_escape_string($conn, $_GET['lokasi']) : '';
-$kategori = isset($_GET['kategori']) ? mysqli_real_escape_string($conn, $_GET['kategori']) : '';
+$employer_id = $_SESSION['employer_id'];
+$employer_id_safe = intval($employer_id);
 
 // Ambil data employer
-$resultEmployer = mysqli_query($conn, "SELECT id, nama_perusahaan, email FROM employers WHERE id = $employerId");
-$employer = mysqli_fetch_assoc($resultEmployer);
+$sql_employer = "SELECT nama_perusahaan, logo FROM employers WHERE id = $employer_id_safe";
+$result_employer = mysqli_query($conn, $sql_employer);
+$employer = mysqli_fetch_assoc($result_employer);
 
 if (!$employer) {
     session_destroy();
     header("Location: login_employer.php");
-    exit;
+    exit();
 }
 
-// Query dasar
-$sql = "SELECT * FROM lowongan WHERE employer_id = $employerId";
+// Hitung jumlah lowongan
+$sql_job_count = "SELECT COUNT(*) as total FROM lowongan WHERE employer_id = $employer_id_safe";
+$result_job_count = mysqli_query($conn, $sql_job_count);
+$job_count = mysqli_fetch_assoc($result_job_count)['total'];
 
-// Tambahkan filter jika ada
-if (!empty($keyword)) {
-    $sql .= " AND (judul LIKE '%$keyword%' OR perusahaan LIKE '%$keyword%')";
-}
+// Hitung jumlah lamaran masuk
+$sql_application_count = "SELECT COUNT(*) as total FROM lamaran l 
+                          JOIN lowongan lo ON l.lowongan_id = lo.id 
+                          WHERE lo.employer_id = $employer_id_safe";
+$result_application_count = mysqli_query($conn, $sql_application_count);
+$application_count = mysqli_fetch_assoc($result_application_count)['total'];
 
-if (!empty($kategori)) {
-    $sql .= " AND kategori = '$kategori'";
-}
+// Ambil daftar lowongan terbaru
+$sql_jobs = "SELECT * FROM lowongan WHERE employer_id = $employer_id_safe ORDER BY created_at DESC LIMIT 5";
+$result_jobs = mysqli_query($conn, $sql_jobs);
+$jobs = mysqli_fetch_all($result_jobs, MYSQLI_ASSOC);
 
-if (!empty($lokasi)) {
-    $sql .= " AND lokasi LIKE '%$lokasi%'";
-}
-
-$sql .= " ORDER BY id DESC";
-
-// Eksekusi query
-$result = mysqli_query($conn, $sql);
+// Ambil daftar lamaran terbaru
+$sql_applications = "SELECT l.*, lo.judul as job_title FROM lamaran l
+                     JOIN lowongan lo ON l.lowongan_id = lo.id
+                     WHERE lo.employer_id = $employer_id_safe";
+$result_applications = mysqli_query($conn, $sql_applications);
+$applications = mysqli_fetch_all($result_applications, MYSQLI_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Job Portal Indonesia</title>
-<link rel="stylesheet" href="styles/index.css?v=<?= time(); ?>">
-<style>
-  /* GLOBAL STYLING */
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    overflow-x: hidden;
-    padding-top: 60px; /* Sesuaikan dengan tinggi navbar */
-}
-
-main {
-    overflow-x: hidden;
-}
-
-/* NAVBAR */
-.navbar-container {
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px 15px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.nav-item {
-    position: relative;
-    font-size: 16px;
-    font-weight: bold;
-    text-decoration: none;
-    color: black;
-    padding-bottom: 5px;
-}
-
-.nav-item::after {
-    content: "";
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: #001f54;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    transform: scaleX(0);
-    transition: transform 0.3s ease-in-out;
-}
-
-.nav-item.active::after,
-.nav-item:hover::after {
-    transform: scaleX(1);
-}
-
-.logo img {
-    width: 150px !important;
-    height: auto;
-}
-
-.outline-button {
-    background: white;
-    color: #001f54;
-    border: 2px solid #001f54;
-    padding: 8px 16px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.outline-button:hover {
-    background: #001f54;
-    color: white;
-}
-
-/* LAYOUT */
-.container {
-    width: 80%;
-    margin: auto;
-    padding: 20px;
-    margin-top: 80px;
-}
-
-.main-container {
-    display: flex;
-    height: 90vh;
-    padding: 20px;
-}
-
-.job-list {
-    width: 60%;
-    overflow-y: auto;
-    border-right: 0 solid #ccc;
-    padding-right: 10px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.job-details {
-  width: 65%;
-  padding: 40px;
-  background-color: #f5f6f8;
-  min-height: 400px;
-  border-radius: 12px;
-  overflow-y: auto;
-  display: flex;
-  align-items: flex-start;
-}
-
-.job-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  color: #333;
-}
-
-.job-placeholder h2 {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.job-placeholder p {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.job-placeholder img {
-  width: 165px;
-  border-radius: 50%;
-  background-color: #ffeaf5;
-  padding: 4px;
-  margin-left: 90%;
-}
-
-/* JOB CARD */
-.job-card {
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
-    background: white;
-    padding: 15px;
-    border-radius: 20px;
-    width: 500px;
-    height: 260px;
-    border: 2px solid #e0e0e0;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.job-card:hover {
-    border-color: #001f54;
-    box-shadow: 0 2.5px 14px rgba(0, 31, 84, 0.12);
-}
-
-.job-card p {
-    font-size: 14px;
-    color: #666;
-    margin: 7px 0;
-}
-
-.job-card img {
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-}
-
-/* MENU DROPDOWN */
-.menu-container {
-    position: absolute;
-    top: 14px;
-    right: 10px;
-}
-
-.menu-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 5px;
-    color: #333;
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    list-style: none;
-    padding: 10px;
-    display: none;
-    min-width: 120px;
-}
-
-.menu-container:hover .dropdown-menu,
-.menu-button:focus + .dropdown-menu {
-    display: inline-block;
-}
-
-.dropdown-menu li a {
-    text-decoration: none;
-    color: white;
-    display: block;
-    transition: background 0.3s;
-}
-
-.dropdown-menu li a:hover {
-    background-color: #000b1d;
-}
-
-/* SEARCH BOX */
-.search-box {
-    background-color: #001f54;
-    background-size: cover;
-    background-position: center;
-    padding: 30px 20px;
-    border-radius: 0;
-    color: white;
-    margin: 0;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.search-box form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.search-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    width: 100%;
-}
-
-.search-field {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 200px;
-}
-
-.search-field label {
-    font-size: 14px;
-    margin-bottom: 8px;
-    color: white;
-    display: block;
-}
-
-.search-field input,
-.search-field select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.search-field input::placeholder {
-    color: #aaa;
-}
-
-button[type="submit"] {
-    background-color: #ff007f;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    height: 42px;
-    box-sizing: border-box;
-    margin-top: 20px;
-}
-
-button[type="submit"]:hover {
-    background-color: #e60073;
-}
-
-/* FOOTER */
-.footer {
-    background-color: #001f54;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    margin-top: 40px;
-}
-
-.footer-container {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    max-width: 1200px;
-    margin: auto;
-    text-align: left;
-}
-
-.footer-section {
-    flex: 1;
-    min-width: 250px;
-    margin: 10px;
-}
-
-.footer-section h3,
-.footer-section h4 {
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.footer-section ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-section ul li {
-    margin: 5px 0;
-}
-
-.footer-section ul li a {
-    color: white;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.footer-section ul li a:hover {
-    color: #ff007f;
-}
-
-.footer-copy {
-    margin-top: 20px;
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-/* ADD JOB BUTTON */
-.add-job-button {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background-color: #001f54;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.add-job-button:hover {
-    background-color: #000b1d;
-    transform: scale(1.1);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="navbar.css">
+    <title>Dashboard Employer - JobSeeker</title>
+    <style>
+        /* Main Content */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-text h1 {
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .welcome-text p {
+            color: var(--dark);
+            margin: 5px 0 0;
+        }
+        
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 20px;
+            border: 2px solid var(--primary);
+        }
+        
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: var(--dark);
+            margin-top: 0;
+            font-size: 16px;
+        }
+        
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .stat-card .view-all {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        /* Recent Tables */
+        .recent-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .recent-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .recent-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .recent-card h2 {
+            color: var(--primary);
+            margin-top: 0;
+            font-size: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .action-link {
+            color: var(--secondary);
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        
+        .action-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+        
+        .footer-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-section ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer-section ul li a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-copy {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #00123b;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d8006a;
+        }
+    </style>
 </head>
 <body>
-
-<!-- Navbar -->
-<div class="navbar-container">
-    <nav class="navbar">
-        <a href="dashboard_employer.php" class="logo">
-            <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
-        </a>
-        <div class="nav-right">
-            <span>Halo, <?= htmlspecialchars($employer['nama_perusahaan']) ?></span> |
-            <a href="dashboard_employer.php" class="nav-item">Beranda</a> |
-            <a href="profile_employer.php" class="nav-item">Profil</a> |
-            <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a> |
-            <a href="logout.php" class="nav-item">Logout</a>
-        </div>
-    </nav>
-</div>
-
-<div class="search-box">
-  <form method="GET">
-    <div class="search-group">
-      <div class="search-field">
-        <label for="keyword">Kata Kunci</label>
-        <input type="text" name="keyword" placeholder="Masukkan kata kunci" value="<?= htmlspecialchars($keyword) ?>">
-      </div>
-      <div class="search-field">
-        <label for="kategori">Klasifikasi</label>
-        <select name="kategori">
-          <option value="">Semua Klasifikasi</option>
-          <option value="IT" <?= $kategori === 'IT' ? 'selected' : '' ?>>IT</option>
-          <option value="Desain" <?= $kategori === 'Desain' ? 'selected' : '' ?>>Desain</option>
-          <option value="Ritel" <?= $kategori === 'Ritel' ? 'selected' : '' ?>>Ritel</option>
-          <option value="Food & Beverage" <?= $kategori === 'Food & Beverage' ? 'selected' : '' ?>>Food & Beverage</option>
-          <option value="Pendidikan" <?= $kategori === 'Pendidikan' ? 'selected' : '' ?>>Pendidikan</option>
-          <option value="Kesehatan" <?= $kategori === 'Kesehatan' ? 'selected' : '' ?>>Kesehatan</option>
-          <option value="Keuangan" <?= $kategori === 'Keuangan' ? 'selected' : '' ?>>Keuangan</option>
-          <option value="Marketing" <?= $kategori === 'Marketing' ? 'selected' : '' ?>>Marketing</option>
-          <option value="Teknik" <?= $kategori === 'Teknik' ? 'selected' : '' ?>>Teknik</option>
-          <option value="Manufaktur" <?= $kategori === 'Manufaktur' ? 'selected' : '' ?>>Manufaktur</option>
-          <option value="Transportasi" <?= $kategori === 'Transportasi' ? 'selected' : '' ?>>Transportasi</option>
-          <option value="Administrasi" <?= $kategori === 'Administrasi' ? 'selected' : '' ?>>Administrasi</option>
-          <option value="Hukum" <?= $kategori === 'Hukum' ? 'selected' : '' ?>>Hukum</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label for="lokasi">Daerah</label>
-        <input type="text" name="lokasi" placeholder="Masukkan lokasi" value="<?= htmlspecialchars($lokasi) ?>">
-      </div>
-      <button type="submit">Cari</button>
+    <!-- Navbar -->
+    <div class="navbar-container">
+        <nav class="navbar">
+            <a href="employer/dashboard_employer.php" class="logo">
+                <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
+            </a>
+            <div class="nav-right">
+                <a href="employer/dashboard_employer.php" class="nav-item active">Dashboard</a>
+                <a href="lowongan_employer.php" class="nav-item">Daftar Lowongan</a>
+                <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a>
+                <a href="lamaran_employer.php" class="nav-item">Lamaran Diterima</a>
+                <a href="profile_employer.php" class="nav-item">Profil</a>
+                <a href="logout.php" class="nav-item">Logout</a>
+            </div>
+        </nav>
     </div>
-  </form>
-</div>
 
-<div class="main-container">
-  <div class="job-list">
-    <?php if ($result && $result->num_rows > 0): ?>
-      <?php while($row = $result->fetch_assoc()): ?>
-        <div class="job-card" data-id="<?= htmlspecialchars($row['id']) ?>">
-          <!-- Menu titik tiga -->
-          <div class="menu-container">
-            <button class="menu-button">⋮</button>
-            <ul class="dropdown-menu">
-              <li><a href="edit_job.php?id=<?= $row['id'] ?>">Edit</a></li>
-              <li><a href="delete_job.php?id=<?= $row['id'] ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus lowongan ini?')">Hapus</a></li>
-            </ul>
-          </div>
-
-          <img src="<?= htmlspecialchars($row['logo'] ?? '/path/to/default-logo.png') ?>" alt="<?= htmlspecialchars($row['perusahaan']) ?>" style="height: 60px; margin-bottom: 15px;">
-          <div style="font-size: 18px; font-weight: bold; color: #6a1b9a; margin-top: 5px;">
-              <?= htmlspecialchars($row['judul']) ?>
-          </div>
-          <div style="font-size: 14px; color: #333; margin-bottom: 10px;">
-              <?= htmlspecialchars($row['perusahaan']) ?>
-          </div>
-          <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              <?= htmlspecialchars($row['kategori']) ?> (<?= htmlspecialchars($row['tipe']) ?>)
-          </div>
-          <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              <?= htmlspecialchars($row['lokasi']) ?>
-          </div>
-          <div style="font-size: 13px; color: #555; margin-bottom: 5px;">
-              Rp.<?= htmlspecialchars($row['gaji_min']) ?> - Rp.<?= htmlspecialchars($row['gaji_max']) ?>
-          </div>
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-text">
+                <h1>Selamat Datang, <?= htmlspecialchars($employer['nama_perusahaan']) ?></h1>
+                <p>Kelola lowongan pekerjaan dan lamaran yang masuk</p>
+            </div>
+            <?php if (!empty($employer['logo'])): ?>
+                <img src="<?= htmlspecialchars($employer['logo']) ?>" alt="Company Logo" class="company-logo">
+            <?php endif; ?>
         </div>
-      <?php endwhile; ?>
-    <?php else: ?>
-      <p>Tidak ada lowongan ditemukan.</p>
-    <?php endif; ?>
-  </div>
 
-  <div class="job-details" id="job-detail">
-    <div class="job-placeholder">
-      <h2><= Pilih lowongan kerja</h2>
-      <p>Tampilkan detail di sini</p>
-      <img src="assets/background/lihat.png" alt="Logo Web" />
-    </div>
-  </div>
-</div>
-
-<!-- Floating Add Job Button -->
-<a href="add_job.php" class="add-job-button">+</a>
-
-<script>
-// Klik job-card buat load detail
-const jobCards = document.querySelectorAll('.job-card');
-const jobDetail = document.getElementById('job-detail');
-
-jobCards.forEach(card => {
-  card.addEventListener('click', (e) => {
-    // Cegah klik di menu titik tiga
-    if (e.target.closest('.menu-container')) return;
-
-    const id = card.getAttribute('data-id');
-    fetch(`detail_employer.php?id=${id}`)
-      .then(res => res.text())
-      .then(html => {
-        jobDetail.innerHTML = html;
-      });
-  });
-});
-</script>
-
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h3>JobSeeker</h3>
-            <p>Temudahkan pencarian kerja untuk masa depan yang lebih baik</p>
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Lowongan</h3>
+                <div class="number"><?= $job_count ?></div>
+                <a href="lowongan_employer.php" class="view-all">Lihat Semua →</a>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Lamaran Masuk</h3>
+                <div class="number"><?= $application_count ?></div>
+                <a href="lamaran_employer.php" class="view-all">Lihat Semua →</a>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Lowongan Aktif</h3>
+                <div class="number">
+                    <?php 
+                    $sql_active = "SELECT COUNT(*) as total FROM lowongan 
+                                  WHERE employer_id = $employer_id_safe 
+                                  AND batas_lamaran >= CURDATE()";
+                    $result_active = mysqli_query($conn, $sql_active);
+                    echo mysqli_fetch_assoc($result_active)['total'];
+                    ?>
+                </div>
+                <a href="lowongan_aktif.php?filter=active" class="view-all">Lihat Semua →</a>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Lowongan Ditutup</h3>
+                <div class="number">
+                    <?php 
+                    $sql_closed = "SELECT COUNT(*) as total FROM lowongan 
+                                  WHERE employer_id = $employer_id_safe 
+                                  AND batas_lamaran < CURDATE()";
+                    $result_closed = mysqli_query($conn, $sql_closed);
+                    echo mysqli_fetch_assoc($result_closed)['total'];
+                    ?>
+                </div>
+                <a href="lowongan_mati.php?filter=closed" class="view-all">Lihat Semua →</a>
+            </div>
         </div>
-        <div class="footer-section">
-            <h4>Perusahaan</h4>
-            <ul>
-                <li><a href="#">Tentang Kami</a></li>
-                <li><a href="#">Karir</a></li>
-                <li><a href="#">Blog</a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h4>Dukungan</h4>
-            <ul>
-                <li><a href="#">Pusat Bantuan</a></li>
-                <li><a href="#">Kebijakan Privasi</a></li>
-                <li><a href="#">Syarat & Ketentuan</a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h4>Kontak</h4>
-            <ul>
-                <li>Email: info@jobseeker.id</li>
-                <li>Telepon: (021) 1234-5678</li>
-                <li>Alamat: Yogyakarta, Indonesia</li>
-            </ul>
+
+        <!-- Recent Jobs and Applications -->
+        <div class="recent-container">
+            <!-- Recent Jobs -->
+            <div class="recent-card">
+                <h2>Lowongan Terbaru</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($jobs as $job): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($job['judul']) ?></td>
+                            <td><?= date('d M Y', strtotime($job['created_at'])) ?></td>
+                            <td>
+                                <a href="edit_lowongan.php?id=<?= $job['id'] ?>" class="action-link">Edit</a>
+                                <a href="lowongan_employer.php?id=<?= $job['id'] ?>" class="action-link">Lihat</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="tambah_lowongan.php" class="btn">Tambah Lowongan Baru</a>
+                </div>
+            </div>
+            
+            <!-- Recent Applications -->
+            <div class="recent-card">
+                <h2>Lamaran Terbaru</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pelamar</th>
+                            <th>Posisi</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($applications as $app): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($app['nama']) ?></td>
+                            <td><?= htmlspecialchars($app['job_title']) ?></td>
+                            <td><?= date('d M Y', strtotime($app['tanggal_lamaran'])) ?></td>
+                            <td>
+                                <a href="lamaran_detail.php?id=<?= $app['id'] ?>" class="action-link">Lihat</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="lamaran_employer.php" class="btn btn-secondary">Lihat Semua Lamaran</a>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="footer-copy">
-        <p>&copy; 2025 JobSeeker Indonesia. All Rights Reserved.</p>
-    </div>
-</footer>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>JobSeeker</h3>
+                <p>Memudahkan pencarian kerja untuk masa depan yang lebih baik</p>
+            </div>
+            <div class="footer-section">
+                <h3>Perusahaan</h3>
+                <ul>
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Karir</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Dukungan</h3>
+                <ul>
+                    <li><a href="#">Pusat Bantuan</a></li>
+                    <li><a href="#">Kebijakan Privasi</a></li>
+                    <li><a href="#">Syarat & Ketentuan</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Kontak</h3>
+                <ul>
+                    <li>Email: info@jobseeker.id</li>
+                    <li>Telepon: (021) 1234-5678</li>
+                    <li>Alamat: Yogyakarta, Indonesia</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-copy">
+            <p>&copy; 2025 JobSeeker Indonesia. All Rights Reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
-
-<?php $conn->close(); ?>

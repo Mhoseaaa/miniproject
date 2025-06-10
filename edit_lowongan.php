@@ -103,74 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Lowongan - JobSeeker</title>
-    <link rel="stylesheet" href="styles/edit_job.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="navbar.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        
-        /* NAVBAR */
-        .navbar-container {
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 5px 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .nav-item {
-            position: relative;
-            font-size: 16px;
-            font-weight: bold;
-            text-decoration: none;
-            color: black;
-            padding-bottom: 5px;
-        }
-
-        .nav-item::after {
-            content: "";
-            display: block;
-            width: 100%;
-            height: 2px;
-            background-color: #001f54;
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            transform: scaleX(0);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .nav-item.active::after,
-        .nav-item:hover::after {
-            transform: scaleX(1);
-        }
-
-        .logo img {
-            width: 150px !important;
-            height: auto;
-        }
-
         /* MAIN CONTENT */
         .register-wrapper {
             max-width: 800px;
@@ -355,17 +289,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 padding: 25px;
             }
             
-            .navbar {
-                flex-direction: column;
-                padding: 10px;
-            }
-            
-            .nav-right {
-                flex-direction: column;
-                gap: 10px;
-                margin-top: 10px;
-            }
-            
             .button-group {
                 flex-direction: column;
                 gap: 10px;
@@ -378,13 +301,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="navbar-container">
         <nav class="navbar">
             <a href="dashboard_employer.php" class="logo">
-                <img src="assets/logo website/jobseeker.png" alt="Logo Web" />
+                <img src="assets/logo website/jobseeker.png" alt="JobSeeker Logo">
             </a>
             <div class="nav-right">
-                <span>Halo, <?= htmlspecialchars($employer['nama_perusahaan']) ?></span> |
-                <a href="dashboard_employer.php" class="nav-item">Beranda</a> |
-                <a href="profile_employer.php" class="nav-item">Profil</a> |
-                <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a> |
+                <a href="dashboard_employer.php" class="nav-item">Dashboard</a>
+                <a href="lowongan_employer.php" class="nav-item active">Edit Lowongan</a>
+                <a href="tambah_lowongan.php" class="nav-item">Tambah Lowongan</a>
+                <a href="lamaran_employer.php" class="nav-item">Lamaran Diterima</a>
+                <a href="profile_employer.php" class="nav-item">Profil</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </div>
         </nav>
