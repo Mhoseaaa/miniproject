@@ -89,7 +89,7 @@ $result = $stmt->get_result();
                 <a href="dashboard_user.php" class="nav-item active">Dashboard</a>
                 <a href="lowongan_user.php" class="nav-item">Daftar Lowongan</a>
                 <a href="lamaran_user.php" class="nav-item">Lamaran Saya</a>
-                <a href="profile_employer.php" class="nav-item">Profil</a>
+                <a href="profile_user.php" class="nav-item">Profil</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </div>
         </nav>
